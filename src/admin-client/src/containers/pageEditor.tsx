@@ -21,8 +21,8 @@ export function PageEditor() {
             <Card.Title>
                 {`Page: ${selectedPage?.title || "No page selected"}`}
             </Card.Title>
-            <Card.Body>
-                <Container>
+            <Card.Body >
+                <Container style={{overflow: 'scroll', height: "300px"}}>
                     {selectedPage?.inputIds.map((id, index) => {
                         if (tree.tree) {
                             const input = getNodeByID(tree.tree, id) as InputNode;
@@ -35,13 +35,13 @@ export function PageEditor() {
                                 </Col>
                                 <Col>
                                     <ButtonGroup>
-                                        <Button onClick={() => {
+                                        <Button disabled = {index == 0} onClick={() => {
                                             dispatch(moveInput({newIndex: index - 1, oldIndex: index}))
                                         }
                                         }>
                                             <SlArrowUp/>
                                         </Button>
-                                        <Button onClick={() => {
+                                        <Button disabled = {index == selectedPage?.inputIds.length-1} onClick={() => {
                                             dispatch(moveInput({newIndex: index + 1, oldIndex: index}))
                                         }
                                         }>
