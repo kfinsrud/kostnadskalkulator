@@ -53,6 +53,7 @@ export class GraphDisplayNode extends ParseableBaseNode <
                 GraphDisplayNodeControlContainer
             )
         );
+        this.addInputGroup();
     }
 
     data( inputs : Record<string, {name: string, value: number, id: string , color: string}[]>) : {} {
@@ -109,13 +110,12 @@ export class GraphDisplayNode extends ParseableBaseNode <
     }
 
     deserializeControls(data: SerializedControls) {
+        this.inputs = {};
         data.inputControlData.forEach(({key, data})=>{
             this.addInputGroup(key);
             (this.inputs[key]?.control as NodeControl<GraphDisplayGroupData>).setNoUpdate(data);
         })
         this.controls.c.set(data.mainControlData);
-
-
     }
 
     toParseNode() : ParseGraphDisplayNode {
