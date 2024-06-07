@@ -30,7 +30,13 @@ export function ResultGraph(
 
     const [selectedId, setSelectedId] = useState(inputNodes?.[0]?.id ?? "")
 
-    const sanitizeHTML = (html: string) => DOMPurify.sanitize(html.replace(/<p>(.*?)<\/p>|(.*)/gs, '$1'))
+    const sanitizeHTML = (html: string | undefined) => {
+        if(html != undefined) {
+            return DOMPurify.sanitize(html.replace(/<p>(.*?)<\/p>|(.*)/gs, '$1'))
+        } else {
+            return "";
+        }
+    }
 
     const node = getNodeByID(props.treeState, selectedId) as InputNode
     const value = getSelectedXLabel(node)
