@@ -7,7 +7,7 @@ export function InformationalDefaultValuesPage() {
                 <Card.Title>
                     {"Tallgrunnlag"}
                 </Card.Title>
-                {"Maskinkostnadene har som grunnlag 2000 timer/år, basert på beregnede kostnader fra Prosjekt Klimatre, justert med Kostnadsindeks for skogsmaskiner pr 3. kvartal 2022."}
+                <p>Kalkulatoren er forhåndsutfylt med verdier som gir et resultat uten at du setter andre verdier.  <b>For å få mest mulig riktige tall for kostnader og produktivitet, må alle variabler vurderes og settes på nytt</b>.</p>
             </Card.Body>
         </Card>
     )
