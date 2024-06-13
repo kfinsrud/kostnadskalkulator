@@ -15,7 +15,8 @@ export function SidePanel() {
                             <Row style={{height: "50%"}}>
                                 <PagesWindow/>
                             </Row>
-                            <Row style={{height: "50%"}}>
+                            <Row style={{minHeight: "2%"}}></Row>
+                            <Row style={{height: "48%"}}>
                                 <PageEditor/>
                             </Row>
                         </Container>
