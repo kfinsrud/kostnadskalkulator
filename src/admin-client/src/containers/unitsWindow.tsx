@@ -9,7 +9,6 @@ import Button from "react-bootstrap/Button";
 import {SlArrowDown, SlArrowUp} from "react-icons/sl";
 import {useState} from "react";
 
-// TODO: Make this look better
 export function UnitBox(props: {
     unit: Unit,
     onChange: (newName: string) => void,
@@ -45,7 +44,7 @@ export function UnitsWindow() {
     const dispatch = useAppDispatch();
 
     return <>
-        <Container>
+        <Container style={{minHeight: "100%", overflowY:"scroll", maxHeight:"100%"}}>
             <Row>
                 <TextEditor
                     value={""}
