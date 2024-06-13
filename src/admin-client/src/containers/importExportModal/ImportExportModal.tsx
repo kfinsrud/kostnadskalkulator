@@ -11,6 +11,7 @@ import {LocalStoragePane} from "./LocalStoragePane";
 import {ParseNode} from "@skogkalk/common/dist/src/parseTree";
 import {EditorDataPackage} from "../../rete/editor";
 import {setUnitsState} from "../../state/slices/units";
+import {setDisplayState} from "../../state/slices/displayArrangements";
 
 /**
  * A modal dialogue for importing and exporting calculators from/to the database and local storage
@@ -50,11 +51,13 @@ function ImportExportModalContent( props: {
     const importCalculator = (data: Calculator["reteSchema"]) => {
         const emptyCanvas = currentCalculator.treeNodes?.length === 1 // only root node is present
         if (data && (emptyCanvas || window.confirm("Unsaved changes will be lost"))) {
-            props.functions?.import(data.graph)
+            props.functions?.import(data.graph);
+            dispatch(setDisplayState(data.store.displayArrangements));
             dispatch(setTreeState(data.store.treeState));
             dispatch(setPagesState(data.store.pages));
             dispatch(setFormulaInfoState(data.store.formulaInfo));
             dispatch(setUnitsState(data.store.units))
+
             props.onHide()
         }
     }
@@ -80,7 +83,6 @@ function ImportExportModalContent( props: {
                     <Col xs={4}>
                         <LocalStoragePane onLoad={importCalculator} calculator={currentCalculator} />
                     </Col>
-
                 </Row>
             </Modal.Body>
         </Modal>

@@ -16,6 +16,10 @@ export const displayArrangementsSlice = createSlice({
     name: 'displayArrangements',
     initialState: {} as DisplayArrangementsState,
     reducers: {
+        setDisplayState(state, action:PayloadAction<DisplayArrangementsState>) {
+
+            return action.payload;
+        },
         moveDisplay: (_state, action: PayloadAction<{id: string, size: "xs" | "md" | "lg", direction: "forward" | "backward", nodes: DisplayNode[]}>) => {
             const {id, size, direction, nodes} = action.payload
             let arrangements = extractDisplayArrangements(nodes)
@@ -76,6 +80,7 @@ function adjustWidth(arrangements: Arrangements, size: "xs" | "md" | "lg", width
 }
 
 export const {
+    setDisplayState,
     moveDisplay,
     changeSpan
 } = displayArrangementsSlice.actions;
