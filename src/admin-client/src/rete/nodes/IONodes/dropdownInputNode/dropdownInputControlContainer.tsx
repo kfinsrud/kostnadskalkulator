@@ -38,7 +38,7 @@ export function DropdownInputControlContent(
     const [nextId, setNextId] = useState(0);
 
     useEffect(() => {
-        console.log(pages)
+        // console.log(pages)
         const ordering = pages
             .find(({page}) => {
                 return page.title === data.pageName
@@ -48,7 +48,7 @@ export function DropdownInputControlContent(
             })
         if (ordering !== undefined) {
             props.data.set({pageOrdering: ordering})
-            console.log("ordering of", data.name, props.data.get('pageOrdering'))
+            // console.log("ordering of", data.name, props.data.get('pageOrdering'))
         }
     }, [data.id, data.name, data.pageName, pages, props.data])
 
@@ -89,7 +89,7 @@ export function DropdownInputControlContent(
                                             }
                                         )
 
-                                        console.log(data.defaultKey)
+                                        // console.log(data.defaultKey)
                                     }}
                                 />
 
@@ -118,7 +118,7 @@ export function DropdownInputControlContent(
                                 })
                                 props.data.set({dropdownOptions: data.dropdownOptions})
                                 setNextId(nextId + 1);
-                                console.log(nextId);
+                                // console.log(nextId);
                             }}
                         >
                             Add option
@@ -149,7 +149,7 @@ export function DropdownInputControlContent(
                                         props.data.set({dropdownOptions: data.dropdownOptions})
                                     }}
                                     onIllegalValue={(value) => {
-                                        console.log("Illegal value", value)
+                                        // console.log("Illegal value", value)
                                     }}
                                     legalRanges={[]}
                                 />
