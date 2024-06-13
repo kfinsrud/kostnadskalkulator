@@ -18,12 +18,12 @@ export function PageEditor() {
 
     return (
         <Card style={{height: "100%", boxShadow: "inset 0px 0px 10px"}}>
-            <Card.Body >
+            <Card.Body style={{height:"100%"}}>
                 <Card.Title>
                     {`Page Preview: ${selectedPage?.title || "No page selected"}`}
                 </Card.Title>
-                <Card.Text>
-                    <Container style={{overflowY: 'scroll', height: "300px"}}>
+                <Card.Text style={{height: "90%"}}>
+                    <Container style={{overflowY: 'scroll', maxHeight: "100%", minHeight:"100%"}}>
                         {selectedPage?.inputIds.map((id, index) => {
                             if (tree.tree) {
                                 const input = getNodeByID(tree.tree, id) as InputNode;
