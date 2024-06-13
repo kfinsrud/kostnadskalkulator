@@ -6,7 +6,7 @@ import {getNodeByID, InputNode} from "@skogkalk/common/dist/src/parseTree";
 import {InputFieldPreview} from "@skogkalk/common/dist/src/visual/inputField/InputField";
 import Button from "react-bootstrap/Button";
 import {SlArrowDown, SlArrowUp} from "react-icons/sl";
-import {moveInput} from "../state/slices/pages";
+import {moveInputOnPage} from "../state/slices/pages";
 
 
 export function PageEditor() {
@@ -37,13 +37,13 @@ export function PageEditor() {
                                     <Col>
                                         <ButtonGroup>
                                             <Button disabled = {index == 0} onClick={() => {
-                                                dispatch(moveInput({newIndex: index - 1, oldIndex: index}))
+                                                dispatch(moveInputOnPage({title: selectedPage.title, newIndex: index - 1, oldIndex: index}))
                                             }
                                             }>
                                                 <SlArrowUp/>
                                             </Button>
                                             <Button disabled = {index == selectedPage?.inputIds.length-1} onClick={() => {
-                                                dispatch(moveInput({newIndex: index + 1, oldIndex: index}))
+                                                dispatch(moveInputOnPage({title: selectedPage.title, newIndex: index + 1, oldIndex: index}))
                                             }
                                             }>
                                                 <SlArrowDown/>

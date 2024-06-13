@@ -53,6 +53,7 @@ export function PagesWindow() {
                                     }}
                                     onMove={(newIndex)=>{
                                         dispatch(movePage({oldIndex: page.ordering, newIndex: newIndex}))
+                                        // console.log(pages);
                                     }}
                                     onDelete={()=>{dispatch(removePage(page.ordering))}}
                                 />

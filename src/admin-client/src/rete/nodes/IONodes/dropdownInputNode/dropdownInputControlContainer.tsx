@@ -149,7 +149,7 @@ export function DropdownInputControlContent(
                                         props.data.set({dropdownOptions: data.dropdownOptions})
                                     }}
                                     onIllegalValue={(value) => {
-                                        // console.log("Illegal value", value)
+                                        console.log("Illegal value", value)
                                     }}
                                     legalRanges={[]}
                                 />

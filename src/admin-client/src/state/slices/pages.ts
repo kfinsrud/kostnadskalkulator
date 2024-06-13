@@ -63,14 +63,14 @@ export const pageSlice = createSlice({
                 page.inputIds = page.inputIds.filter(id => id !== action.payload.nodeID)
             });
         },
-        moveInput: (state, action: PayloadAction<{ oldIndex: number, newIndex: number }>) => {
+        moveInputOnPage: (state, action: PayloadAction<{ title: string, oldIndex: number, newIndex: number }>) => {
             const {oldIndex, newIndex} = action.payload;
-            state.pages.forEach(({page}) => {
-                if (newIndex < 0 || newIndex >= page.inputIds.length) return;
-                [page.inputIds[newIndex], page.inputIds[oldIndex]] =
-                    [page.inputIds[oldIndex], page.inputIds[newIndex]];
-            })
+            const page = state.pages.find(p=>p.page.title == action.payload.title)?.page;
 
+            if (!page || newIndex < 0 || newIndex >= page.inputIds.length) return;
+
+            [page.inputIds[newIndex], page.inputIds[oldIndex]] =
+                [page.inputIds[oldIndex], page.inputIds[newIndex]];
         },
         setPageSelection: (state, action: PayloadAction<number>) => {
             state.selected = action.payload;
@@ -84,7 +84,7 @@ export const {
     updatePage,
     movePage,
     addInputToPage,
-    moveInput,
+    moveInputOnPage,
     setPageSelection,
     setPagesState,
     removeInputFromPage
