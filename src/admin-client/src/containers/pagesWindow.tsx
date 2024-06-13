@@ -1,5 +1,5 @@
 import Container from "react-bootstrap/Container";
-import {InputGroup, Row} from "react-bootstrap";
+import {Card, InputGroup, Row} from "react-bootstrap";
 import {useAppDispatch, useAppSelector} from "../state/hooks";
 import {selectPages} from "../state/store";
 import {TextInputField} from "../components/input/textInputField";
@@ -37,24 +37,30 @@ export function PagesWindow() {
 
 
     return <>
-        <Container>
-            <Row>
-                <Button onClick={()=>{dispatch(addPage({title: "", ordering: 1, subPages:[], inputIds:[]}))}}>Add page</Button>
-            </Row>
-            {pages.map(({id, page}) => {
-                return <Row key={id}>
-                    <PageBox
-                        page={page}
-                        onChange={(newTitle)=>{
-                            dispatch(updatePage({...page, title: newTitle}))
-                        }}
-                        onMove={(newIndex)=>{
-                            dispatch(movePage({oldIndex: page.ordering, newIndex: newIndex}))
-                        }}
-                        onDelete={()=>{dispatch(removePage(page.ordering))}}
-                    />
-                </Row>
-            })}
-        </Container>
+        <Card style={{height: "100%"}} >
+            <Card.Body style={{height:"100%"}}>
+                <Card.Title style={{height:"10%"}}>
+                    <Button onClick={()=>{dispatch(addPage({title: "", ordering: -1, subPages:[], inputIds:[]}))}}>Add page</Button>
+                </Card.Title>
+                <Card.Text style={{height:"90%"}}>
+                    <Container style={{ minHeight: "100%", maxHeight:"100%", overflowY: "scroll"}}>
+                        {pages.map(({id, page}) => {
+                            return <Row key={id}>
+                                <PageBox
+                                    page={page}
+                                    onChange={(newTitle)=>{
+                                        dispatch(updatePage({...page, title: newTitle}))
+                                    }}
+                                    onMove={(newIndex)=>{
+                                        dispatch(movePage({oldIndex: page.ordering, newIndex: newIndex}))
+                                    }}
+                                    onDelete={()=>{dispatch(removePage(page.ordering))}}
+                                />
+                            </Row>
+                        })}
+                    </Container>
+                </Card.Text>
+            </Card.Body>
+        </Card>
     </>
 }

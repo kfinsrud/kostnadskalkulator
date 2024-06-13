@@ -17,12 +17,12 @@ export function PageEditor() {
     const dispatch = useAppDispatch();
 
     return (
-        <Card>
+        <Card style={{height: "100%"}}>
             <Card.Title>
-                {`Page: ${selectedPage?.title || "No page selected"}`}
+                {`Page Preview: ${selectedPage?.title || "No page selected"}`}
             </Card.Title>
             <Card.Body >
-                <Container style={{overflow: 'scroll', height: "300px"}}>
+                <Container style={{overflowY: 'scroll', height: "300px"}}>
                     {selectedPage?.inputIds.map((id, index) => {
                         if (tree.tree) {
                             const input = getNodeByID(tree.tree, id) as InputNode;
