@@ -17,7 +17,7 @@ export const selectCalculator = (rete: {graph: EditorDataPackage, parseNodes: Pa
             deleted: false,
             disabled: false,
             reteSchema: {
-                store: {formulaInfo: state.formulaInfo, pages: state.pages, treeState: state.treeState},
+                store: {formulaInfo: state.formulaInfo, pages: state.pages, treeState: state.treeState, units: state.units},
                 graph: rete?.graph ?? {}
             },
             treeNodes: [rootNode, ...(rete?.parseNodes ?? [])]
