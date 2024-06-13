@@ -17,45 +17,47 @@ export function PageEditor() {
     const dispatch = useAppDispatch();
 
     return (
-        <Card style={{height: "100%"}}>
-            <Card.Title>
-                {`Page Preview: ${selectedPage?.title || "No page selected"}`}
-            </Card.Title>
+        <Card style={{height: "100%", boxShadow: "inset 0px 0px 10px"}}>
             <Card.Body >
-                <Container style={{overflowY: 'scroll', height: "300px"}}>
-                    {selectedPage?.inputIds.map((id, index) => {
-                        if (tree.tree) {
-                            const input = getNodeByID(tree.tree, id) as InputNode;
-                            if (!input) {
-                                return null
+                <Card.Title>
+                    {`Page Preview: ${selectedPage?.title || "No page selected"}`}
+                </Card.Title>
+                <Card.Text>
+                    <Container style={{overflowY: 'scroll', height: "300px"}}>
+                        {selectedPage?.inputIds.map((id, index) => {
+                            if (tree.tree) {
+                                const input = getNodeByID(tree.tree, id) as InputNode;
+                                if (!input) {
+                                    return null
+                                }
+                                return <Row key={id}>
+                                    <Col md={8}>
+                                        <InputFieldPreview node={input}/>
+                                    </Col>
+                                    <Col>
+                                        <ButtonGroup>
+                                            <Button disabled = {index == 0} onClick={() => {
+                                                dispatch(moveInput({newIndex: index - 1, oldIndex: index}))
+                                            }
+                                            }>
+                                                <SlArrowUp/>
+                                            </Button>
+                                            <Button disabled = {index == selectedPage?.inputIds.length-1} onClick={() => {
+                                                dispatch(moveInput({newIndex: index + 1, oldIndex: index}))
+                                            }
+                                            }>
+                                                <SlArrowDown/>
+                                            </Button>
+                                        </ButtonGroup>
+                                    </Col>
+                                </Row>
+                            } else {
+                                throw new Error("Tree not loaded");
                             }
-                            return <Row key={id}>
-                                <Col md={8}>
-                                    <InputFieldPreview node={input}/>
-                                </Col>
-                                <Col>
-                                    <ButtonGroup>
-                                        <Button disabled = {index == 0} onClick={() => {
-                                            dispatch(moveInput({newIndex: index - 1, oldIndex: index}))
-                                        }
-                                        }>
-                                            <SlArrowUp/>
-                                        </Button>
-                                        <Button disabled = {index == selectedPage?.inputIds.length-1} onClick={() => {
-                                            dispatch(moveInput({newIndex: index + 1, oldIndex: index}))
-                                        }
-                                        }>
-                                            <SlArrowDown/>
-                                        </Button>
-                                    </ButtonGroup>
-                                </Col>
-                            </Row>
-                        } else {
-                            throw new Error("Tree not loaded");
-                        }
 
-                    })}
-                </Container>
+                        })}
+                    </Container>
+                </Card.Text>
             </Card.Body>
         </Card>
     );

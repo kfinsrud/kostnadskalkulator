@@ -77,7 +77,7 @@ function DisplayPreviewContainer(props: {
 
     return (
         <div ref={tabRef}>
-            <Container style={{height: `${tabHeight}px`, overflowY: 'auto'}}>
+            <Container style={{height: `${tabHeight}px`, overflowY: 'scroll'}}>
                     <Stack className={"mx-auto p-3"} style={{width: getWidth(props.widthMultiplier), backgroundColor: '#004f59'}} gap={3}>
                         <Row>
                             <Banner />

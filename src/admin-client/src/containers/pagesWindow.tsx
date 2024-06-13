@@ -37,7 +37,7 @@ export function PagesWindow() {
 
 
     return <>
-        <Card style={{height: "100%"}} >
+        <Card style={{height: "100%", boxShadow: "inset 0px 0px 10px"}} >
             <Card.Body style={{height:"100%"}}>
                 <Card.Title style={{height:"10%"}}>
                     <Button onClick={()=>{dispatch(addPage({title: "", ordering: -1, subPages:[], inputIds:[]}))}}>Add page</Button>
