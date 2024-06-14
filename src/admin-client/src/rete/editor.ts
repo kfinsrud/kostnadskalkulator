@@ -442,11 +442,18 @@ export class Editor {
     }
 
     /**
-     * Focuses the view on the currently selected node, as indicated by a highlight
+     * Focuses the view on the last selected node, or on another node if
+     * provided id results in a match.
      */
-    public focusViewOnSelectedNode() {
-        let node: ReteNode | undefined;
-        if(this.selectedNode && (node = this.context.editor.getNode(this.selectedNode)) ) {
+    public focusViewOnSelectedNode(id?: string) {
+        this.selectedNode = (id != undefined) ? id : this.selectedNode;
+        let node = this.context.editor.getNode(this.selectedNode ?? "");
+        if(node != undefined) {
+            for( let n of this.context.editor.getNodes() ) {
+                n.selected = n.id == node.id;
+            }
+            //ensures node behaves as if selected by cursor
+            this.context.area.emit({type:"nodepicked", data: node});
             AreaExtensions.zoomAt(this.context.area, [node]).catch(()=>{}).then(() => {});
         }
     }

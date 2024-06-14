@@ -107,7 +107,7 @@ export default function App() {
                           <RetePanel reteRef={reteRef} />
                       </Col>
                       <Col className={"h-100"} style={{ padding: 0, width: '500px', flex: 'none'}}>
-                          <SidePanel />
+                          <SidePanel reteFunctions={functions} />
                       </Col>
                   </Row>
 
