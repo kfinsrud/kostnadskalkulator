@@ -98,7 +98,6 @@ export default function App() {
 
   return (
       <Provider store={store}>
-          {/*<div className="App">*/}
               <NavBar functions={functions} />
               <Container className={"h-100"} fluid>
                   <Row className={"h-100"}>
@@ -110,10 +109,7 @@ export default function App() {
                           <SidePanel reteFunctions={functions} />
                       </Col>
                   </Row>
-
-                  "werwer"
               </Container>
-          {/*</div>*/}
 
       </Provider>
   );

@@ -65,6 +65,9 @@ html, body, #root {
   background-color: transparent !important;
 }
 
+.ck-body-wrapper {
+  z-index: 1300 !important;
+}
 
 /* avoid applying hover on touch devices that emulate it. Buttons tend to "stick" */
 @media (hover: hover) {
