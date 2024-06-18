@@ -7,7 +7,7 @@ import {NodeControl} from "../nodeControl";
 import {ChooseNodeContainer, ComparisonControlContainer} from "./ChooseNodeContainer";
 import {ChooseNode as ParseChooseNode} from "@skogkalk/common/dist/src/parseTree/nodes/chooseNode";
 import {NumberNodeOutput} from "../types";
-import {NodeAction, NodeActionType, objectToPayload} from "../../nodeActions";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 
 interface CompositeControlData {
