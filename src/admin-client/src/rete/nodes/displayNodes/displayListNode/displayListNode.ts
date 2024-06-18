@@ -36,7 +36,7 @@ export class DisplayListNode extends ParseableBaseNode <
             new NodeControl(
                 initialControlData,
                 {
-                    onUpdate: (data) => {
+                    onUpdate: () => {
                         dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
                         dispatch(
                             {
