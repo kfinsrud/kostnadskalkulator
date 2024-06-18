@@ -49,8 +49,4 @@ export abstract class BaseNode<
     abstract serializeControls() : any;
 
     abstract deserializeControls(serializedData: any) : void;
-
-    protected abstract updateNodeRendering(nodeID: string): void;
-
-    protected abstract updateDataFlow(): void;
 }

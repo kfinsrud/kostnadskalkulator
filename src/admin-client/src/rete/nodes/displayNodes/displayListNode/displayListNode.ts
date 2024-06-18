@@ -1,14 +1,11 @@
 import {ParseableBaseNode} from "../../parseableBaseNode";
 import {ClassicPreset} from "rete";
-import {NodeType} from "@skogkalk/common/dist/src/parseTree";
-import {DisplayPreviewNode as ParseDisplayPreviewNode } from "@skogkalk/common/dist/src/parseTree"
+import {DisplayPreviewNode as ParseDisplayPreviewNode, NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {ResultSocket} from "../../../sockets";
-import {
-    DisplayListNodeControlContainer
-} from "./displayListNodeControlContainer";
+import {DisplayListNodeControlContainer} from "./displayListNodeControlContainer";
 import {NodeControl} from "../../nodeControl";
 import {DisplayListNodeData} from "./displayListNodeControlData";
-
+import {NodeAction, NodeActionType, objectToPayload} from "../../../nodeActions";
 
 
 export class DisplayListNode extends ParseableBaseNode <
@@ -17,8 +14,7 @@ export class DisplayListNode extends ParseableBaseNode <
     { c: NodeControl<DisplayListNodeData> }
 > {
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        private updateStore: () => void,
+        private dispatch: (action: NodeAction) => void = ()=>{},
         id?: string,
     ) {
         super(NodeType.ListDisplay, 600, 400, "List", id);
@@ -40,9 +36,14 @@ export class DisplayListNode extends ParseableBaseNode <
             new NodeControl(
                 initialControlData,
                 {
-                    onUpdate: () => {
-                        updateNodeRendering(this.id);
-                        updateStore();
+                    onUpdate: (data) => {
+                        dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+                        dispatch(
+                            {
+                                nodeID: this.id,
+                                payload: objectToPayload(this.toParseNode()),
+                                type: NodeActionType.StateChange
+                            });
 
                     },
                     minimized: false
@@ -56,9 +57,9 @@ export class DisplayListNode extends ParseableBaseNode <
         const { input } = inputs
         if(input) {
             this.controls.c.setNoUpdate({inputs: input.map((node, index)=>{return { label: node.name, id: node.id, value: node.value, color: node.color, ordering: index}})});
-            this.updateStore();
+            this.dispatch({nodeID: this.id, payload: objectToPayload(this.toParseNode()), type: NodeActionType.StateChange});
         }
-        this.updateNodeRendering?.(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
         return {}
     }
 
@@ -88,6 +89,4 @@ export class DisplayListNode extends ParseableBaseNode <
             }
         }
     }
-
-    protected updateDataFlow: () => void = () => {}
 }

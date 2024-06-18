@@ -8,6 +8,7 @@ import {NumberSocket} from "../../../sockets";
 import {NumberInputControlContainer} from "./numberInputControlContainer";
 import {NodeControl} from "../../nodeControl";
 import {NumberNodeOutput} from "../../types";
+import {NodeAction, NodeActionType} from "../../../nodeActions";
 
 
 /**
@@ -20,9 +21,7 @@ export class NumberInputNode extends ParseableBaseNode<
 > {
 
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        protected updateDataFlow: () => void,
-        private updateStore: () => void,
+        private dispatch: (action: NodeAction) => void,
         id?: string
     ) {
         super( NodeType.NumberInput, 400, 400, "Number Input", id);
@@ -60,9 +59,9 @@ export class NumberInputNode extends ParseableBaseNode<
                         this.width = this.originalWidth;
                         this.height = this.originalHeight + this.controls.c.get('legalValues').length * 74;
                     }
-                    this.updateNodeRendering?.(this.id);
-                    this.updateDataFlow?.();
-                    this.updateStore();
+                    this.dispatch({type:NodeActionType.UpdateRender, nodeID: this.id})
+                    this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                    this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload:[]})
                 },
                 minimized: false
             },
@@ -70,7 +69,7 @@ export class NumberInputNode extends ParseableBaseNode<
         ));
 
         this.addOutput("out", new ClassicPreset.Output(new NumberSocket(), "Number"));
-        this.updateStore();
+        this.dispatch({type:NodeActionType.UpdateRender, nodeID: this.id})
     }
 
     data(): { out: NumberNodeOutput } {

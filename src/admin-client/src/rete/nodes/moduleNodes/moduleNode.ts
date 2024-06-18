@@ -6,6 +6,7 @@ import {NumberSocket} from "../../sockets";
 import {ModuleNodeControl} from "./moduleControls";
 import {BaseNode} from "../baseNode";
 import {NodeControl} from "../nodeControl";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 
 export interface ModuleNodeControlData {
@@ -24,9 +25,7 @@ export class ModuleNode extends BaseNode<
 
     constructor(
         private moduleManager: ModuleManager,
-        private removeConnections: (nodeId: string) => Promise<void>,
-        protected updateNodeRendering: (nodeId: string) => void,
-        protected updateDataFlow: ()=>void,
+        private dispatch: (action: NodeAction) => void,
         id?: string
     ) {
         super(NodeType.Module, 140, 180, "Module", id);
@@ -44,8 +43,8 @@ export class ModuleNode extends BaseNode<
                     onUpdate: (data: Partial<ModuleNodeControlData>)=>{
                         if('currentModule' in data) {
                             this.setModuleAndRefreshPorts().then(()=>{
-                                this.updateNodeRendering(this.id);
-                                this.updateDataFlow();
+                                this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+                                this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
                             });
                         }
                     },
@@ -75,7 +74,7 @@ export class ModuleNode extends BaseNode<
     public async setModuleAndRefreshPorts() {
         this.module = this.moduleManager.getModule(this.controls.c.get('currentModule'));
 
-        await this.removeConnections(this.id);
+        this.dispatch({type: NodeActionType.Disconnect, nodeID: this.id})
         if (this.module) {
             const editor = new NodeEditor<Schemes>();
             await this.module.apply(editor);

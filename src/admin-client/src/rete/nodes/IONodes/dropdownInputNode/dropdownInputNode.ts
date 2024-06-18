@@ -1,15 +1,12 @@
 import {ParseableBaseNode} from "../../parseableBaseNode";
 import {ClassicPreset} from "rete";
-import {NodeType} from "@skogkalk/common/dist/src/parseTree";
-import {DropdownInput} from "@skogkalk/common/dist/src/parseTree"
+import {DropdownInput, NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {DropdownInputControlData} from "./dropdownInputControlData";
 import {NumberSocket} from "../../../sockets";
-import {
-    DropdownInputControlContainer
-} from "./dropdownInputControlContainer";
+import {DropdownInputControlContainer} from "./dropdownInputControlContainer";
 import {NodeControl} from "../../nodeControl";
 import {NumberNodeOutput} from "../../types";
-
+import {NodeAction, NodeActionType} from "../../../nodeActions";
 
 
 /**
@@ -22,9 +19,7 @@ export class DropdownInputNode extends ParseableBaseNode<
 > {
 
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void, // function that updates node rendering
-        protected updateDataFlow: () => void, // function to be called on user changing value
-        private updateStore: () => void,
+        private dispatch: (action: NodeAction) => void,
         id?: string,
     ) {
         super(NodeType.DropdownInput, 400, 400, "Dropdown Input", id);
@@ -53,9 +48,9 @@ export class DropdownInputNode extends ParseableBaseNode<
                         this.width = this.originalWidth;
                         this.height = this.originalHeight + this.controls.c.get('dropdownOptions').length * 74;
                     }
-                    this.updateNodeRendering(this.id);
-                    this.updateDataFlow();
-                    this.updateStore();
+                    this.dispatch({type:NodeActionType.UpdateRender, nodeID: this.id})
+                    this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                    this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload: []})
                 },
                 minimized: false
             },
@@ -63,8 +58,9 @@ export class DropdownInputNode extends ParseableBaseNode<
         ));
 
         this.addOutput("out", new ClassicPreset.Output(new NumberSocket(), "Number"));
-        this.updateStore();
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
     }
+
 
     data(): { out: NumberNodeOutput } {
         return {

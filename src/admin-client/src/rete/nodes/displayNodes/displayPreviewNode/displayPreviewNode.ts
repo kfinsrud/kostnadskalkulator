@@ -1,13 +1,11 @@
 import {ParseableBaseNode} from "../../parseableBaseNode";
 import {ClassicPreset} from "rete";
-import {NodeType} from "@skogkalk/common/dist/src/parseTree";
-import {DisplayPreviewNode as ParseDisplayPreviewNode } from "@skogkalk/common/dist/src/parseTree"
+import {DisplayPreviewNode as ParseDisplayPreviewNode, NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {ResultSocket} from "../../../sockets";
-import {
-    DisplayPreviewNodeControlContainer
-} from "./displayPreviewNodeControlContainer";
+import {DisplayPreviewNodeControlContainer} from "./displayPreviewNodeControlContainer";
 import {NodeControl} from "../../nodeControl";
 import {DisplayPreviewNodeData} from "./displayPreviewNodeControlData";
+import {NodeAction, NodeActionType, objectToPayload} from "../../../nodeActions";
 
 
 export class DisplayPreviewNode extends ParseableBaseNode <
@@ -16,8 +14,7 @@ export class DisplayPreviewNode extends ParseableBaseNode <
     { c: NodeControl<DisplayPreviewNodeData> }
 > {
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        private updateStore: () => void,
+        private dispatch: (action: NodeAction) => void = ()=>{},
         id?: string,
     ) {
         super(NodeType.PreviewDisplay, 600, 400, "Preview", id);
@@ -39,8 +36,13 @@ export class DisplayPreviewNode extends ParseableBaseNode <
                 initialControlData,
                 {
                     onUpdate: () => {
-                        updateNodeRendering(this.id);
-                        updateStore();
+                        dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+                        dispatch(
+                            {
+                                nodeID: this.id,
+                                payload: objectToPayload(this.toParseNode()),
+                                type: NodeActionType.StateChange
+                            });
 
                     },
                     minimized: false
@@ -54,9 +56,9 @@ export class DisplayPreviewNode extends ParseableBaseNode <
         const { input } = inputs
         if(input) {
             this.controls.c.setNoUpdate({inputs: input.map((node, index)=>{return { label: node.name, id: node.id, value: node.value, color: node.color, ordering: index}})});
-            this.updateStore();
+            this.dispatch({nodeID: this.id, payload: objectToPayload(this.toParseNode()), type: NodeActionType.StateChange});
         }
-        this.updateNodeRendering?.(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
         return {}
     }
 
@@ -86,6 +88,4 @@ export class DisplayPreviewNode extends ParseableBaseNode <
             }
         }
     }
-
-    protected updateDataFlow: () => void = () => {}
 }

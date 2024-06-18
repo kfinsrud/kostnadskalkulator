@@ -1,13 +1,11 @@
 import {ParseableBaseNode} from "../../parseableBaseNode";
 import {ClassicPreset} from "rete";
-import {NodeType} from "@skogkalk/common/dist/src/parseTree";
-import {DisplayPieNode as ParseDisplayPieNode } from "@skogkalk/common/dist/src/parseTree"
+import {DisplayPieNode as ParseDisplayPieNode, NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {DisplayPieNodeData} from "./displayPieNodeControlData";
 import {ResultSocket} from "../../../sockets";
-import {
-    DisplayPieNodeControlContainer
-} from "./displayPieNodeControlContainer";
+import {DisplayPieNodeControlContainer} from "./displayPieNodeControlContainer";
 import {NodeControl} from "../../nodeControl";
+import {NodeAction, NodeActionType, objectToPayload} from "../../../nodeActions";
 
 
 export class DisplayPieNode extends ParseableBaseNode <
@@ -16,8 +14,7 @@ export class DisplayPieNode extends ParseableBaseNode <
     { c: NodeControl<DisplayPieNodeData> }
 > {
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        private updateStore: () => void,
+        private dispatch: (action: NodeAction) => void = ()=>{},
         id?: string,
     ) {
         super(NodeType.Display, 600, 400, "Pie Chart", id);
@@ -41,9 +38,13 @@ export class DisplayPieNode extends ParseableBaseNode <
                 initialControlData,
                 {
                     onUpdate: () => {
-                        updateNodeRendering(this.id);
-                        updateStore();
-
+                        dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+                        dispatch(
+                            {
+                                nodeID: this.id,
+                                payload: objectToPayload(this.toParseNode()),
+                                type: NodeActionType.StateChange
+                            });
                     },
                     minimized: false
                 },
@@ -56,9 +57,9 @@ export class DisplayPieNode extends ParseableBaseNode <
         const { input } = inputs
         if(input) {
             this.controls.c.setNoUpdate({inputs: input.map((node, index)=>{return { label: node.name, id: node.id, value: node.value, color: node.color, ordering: index}})});
-            this.updateStore();
+            this.dispatch({nodeID: this.id, payload: objectToPayload(this.toParseNode()), type: NodeActionType.StateChange});
         }
-        this.updateNodeRendering?.(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
         return {}
     }
 
@@ -89,8 +90,4 @@ export class DisplayPieNode extends ParseableBaseNode <
             }
         }
     }
-
-
-
-    protected updateDataFlow: () => void = () => {}
 }

@@ -1,12 +1,12 @@
 import {ParseableBaseNode} from "../../parseableBaseNode";
-import {NodeType} from "@skogkalk/common/dist/src/parseTree";
+import {NodeType, OutputNode as ParseOutputNode} from "@skogkalk/common/dist/src/parseTree";
 import {ClassicPreset} from "rete";
 import {OutputNodeControlData} from "./outputNodeControlData";
-import {OutputNode as ParseOutputNode} from "@skogkalk/common/dist/src/parseTree"
 import {NumberSocket, ResultSocket} from "../../../sockets";
 import {OutputNodeControlContainer} from "./outputNodeControlContainer";
 import {NodeControl} from "../../nodeControl";
 import {NumberNodeOutput} from "../../types";
+import {NodeAction, NodeActionType} from "../../../nodeActions";
 
 
 export class OutputNode extends ParseableBaseNode <
@@ -17,8 +17,7 @@ export class OutputNode extends ParseableBaseNode <
 
 
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        protected updateDataFlow: ()=>void,
+        private dispatch: (action: NodeAction) => void,
         id?: string
     ) {
         super(NodeType.Output, 240, 200, "Output", id);
@@ -37,8 +36,8 @@ export class OutputNode extends ParseableBaseNode <
                 initialState,
                 {
                     onUpdate: ()=> {
-                        this.updateDataFlow();
-                        this.updateNodeRendering(this.id);
+                        this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
                     },
                     minimized: false
                 },
@@ -49,7 +48,7 @@ export class OutputNode extends ParseableBaseNode <
     data( inputs :{ result?: NumberNodeOutput[] }) : { out: {name: string, value: number, id: string, color: string }} {
         const { result } = inputs
         if(result) {
-            this.updateNodeRendering?.(this.id);
+            this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
             this.controls.c.setNoUpdate({value: result[0].value});
         }
         return {

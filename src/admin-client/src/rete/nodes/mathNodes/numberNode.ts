@@ -6,6 +6,7 @@ import {NumberSocket} from "../../sockets";
 import {NumberControlComponent} from "./numberControl/numberControlComponent";
 import {NodeControl} from "../nodeControl";
 import {NumberNodeOutput} from "../types";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 
 /**
@@ -19,14 +20,13 @@ export class NumberNode extends ParseableBaseNode<
     clone: () => NumberNode;
     constructor(
         initialValue: number,
-        protected updateNodeRendering: (id: string)=>void,
-        protected updateDataFlow: () => void,
+        private dispatch: (action: NodeAction) => void,
         id?: string
     ) {
         super(NodeType.Number, 160, 180, "Constant", id);
 
 
-        this.clone = () => new NumberNode(this.controls.c.get('value') || 0, this.updateNodeRendering, this.updateDataFlow);
+        this.clone = () => new NumberNode(this.controls.c.get('value') || 0, this.dispatch);
 
         this.addControl(
             "c",
@@ -34,8 +34,8 @@ export class NumberNode extends ParseableBaseNode<
                 {value: initialValue, readonly: false} as NumberControlData,
                 {
                     onUpdate: ()=>{
-                        updateDataFlow();
-                        updateNodeRendering(this.id);
+                        this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
                     },
                     minimized: false
                 },
@@ -46,7 +46,7 @@ export class NumberNode extends ParseableBaseNode<
     }
 
     data(): { out: NumberNodeOutput } {
-        this.clone = () => new NumberNode(this.controls.c.get('value') || 0, this.updateNodeRendering, this.updateDataFlow);
+        this.clone = () => new NumberNode(this.controls.c.get('value') || 0, this.dispatch);
         return {
             out: { value: this.controls.c.get('value') || 0, sourceID: this.id }
         };

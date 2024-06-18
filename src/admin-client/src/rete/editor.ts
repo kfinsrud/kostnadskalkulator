@@ -8,7 +8,7 @@ import {Presets as ScopesPresets, ScopesPlugin} from "rete-scopes-plugin";
 import {AutoArrangePlugin, Presets as ArrangePresets} from "rete-auto-arrange-plugin";
 import {createParseNodeGraph} from "./adapters";
 import {createRoot} from "react-dom/client";
-import {NodeType, ParseNode} from "@skogkalk/common/dist/src/parseTree";
+import {NodeType, ParseNode, TreeState, treeStateFromData} from "@skogkalk/common/dist/src/parseTree";
 import {ItemDefinition} from "rete-context-menu-plugin/_types/presets/classic/types";
 import {ContextMenuExtra, ContextMenuPlugin, Presets as ContextMenuPresets} from "rete-context-menu-plugin";
 import {ModuleEntry, ModuleManager} from "./moduleManager";
@@ -17,6 +17,7 @@ import {NodeFactory} from "./nodeFactory";
 import {canCreateConnection} from "./sockets";
 import {ModuleNode} from "./nodes/moduleNodes/moduleNode";
 import {CustomNode} from "./nodes/CustomNode";
+import {NodeAction, NodeActionType} from "./nodeActions";
 
 
 export type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
@@ -67,7 +68,7 @@ export class Editor {
     public  currentModule: Readonly<string> | undefined;
 
     public destroyArea = () => {this.context.area.destroy()}
-
+    private currentTreeState?: TreeState
 
 
 
@@ -88,10 +89,7 @@ export class Editor {
 
         this.factory = new NodeFactory(
             this.moduleManager,
-            (id: string)=>{ this.context.area.update('node', id)},
-            this.updateDataFlow.bind(this),
-            this.removeNodeConnections.bind(this),
-            this.signalOnChange.bind(this)
+            (action: NodeAction) => { this.dispatchAction(action)},
         );
 
         this.setUpEditor();
@@ -109,6 +107,7 @@ export class Editor {
         )
 
         AreaExtensions.zoomAt(this.context.area, this.context.editor.getNodes()).then(() => {});
+        this.exportAsParseTree().then(state=>this.currentTreeState=treeStateFromData(state))
     }
 
 
@@ -181,7 +180,38 @@ export class Editor {
 
 
 
+    private async dispatchAction(action: NodeAction) {
+        switch(action.type) {
+            case NodeActionType.Disconnect: { // no particular rules.
+                await this.removeNodeConnections(action.nodeID);
+            } break;
+            case NodeActionType.RecalculateGraph: { // Ikke noe problem per nå. if already updating whole graph, ignore
+                await this.updateDataFlow();
+            } break;
+            case NodeActionType.UpdateRender: { // no particular rules. perhaps pause during dataflow update
+                await this.context.area.update('node', action.nodeID);
+            } break;
+            case NodeActionType.StateChange: { // tree state change. payload must contain state that has changed.
+                //
+                // const node = getNodeByID(this.currentTreeState, action.nodeID);
+                // if(node == undefined || action.payload == undefined) return;
+                //
+                // for( const { key, value } of action.payload ) {
+                //    if((node as any)[key] != undefined) {
+                //        switch(key) {
+                //            case "id" : break;
+                //            case "inputs" : break;
+                //            case "right" : break;
+                //            case "left" : break;
+                //            default: (node as any)[key] = value; break;
+                //        }
+                //    }
+                // }
+                await this.signalOnChange();
+            } break;
+        }
 
+    }
 
 
 
@@ -190,13 +220,11 @@ export class Editor {
     /**
      * Causes an update of values throughout the tree structure
      */
-    private updateDataFlow() {
+    private async updateDataFlow() {
         this.context.engine.reset();
-        this.context.editor
-            .getNodes()
-            .forEach(async (node) => {
-                await this.context.engine.fetch(node.id).catch(() => {});
-            });
+        for(const node of this.context.editor.getNodes()) {
+            await this.context.engine.fetch(node.id)
+        }
     }
 
 
@@ -256,7 +284,7 @@ export class Editor {
     /**
      * Invokes all callbacks if not in the process of loading a file.
      */
-    private signalOnChange = async ()=>{
+    private signalOnChange = async ()=> {
         if(!this.loading && !this.hasModuleLoaded()) {
             const nodes = await this.exportAsParseTree()
             this.onChangeCalls.forEach(({call})=>{

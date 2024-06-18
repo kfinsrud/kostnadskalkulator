@@ -7,6 +7,7 @@ import {GraphDisplayGroupData, GraphDisplayNodeControlData} from "./graphDisplay
 import {GraphDisplayGroupControlContainer, GraphDisplayNodeControlContainer} from "./graphDisplayNodeControlContainer";
 import {GraphDisplayNode as ParseGraphDisplayNode} from "@skogkalk/common/src/parseTree";
 import {ResultGroup} from "@skogkalk/common/dist/src/parseTree/nodes/displayNode";
+import {NodeAction, NodeActionType, objectToPayload} from "../../../nodeActions";
 
 
 interface SerializedControls {
@@ -21,9 +22,7 @@ export class GraphDisplayNode extends ParseableBaseNode <
     { c: NodeControl<GraphDisplayNodeControlData> }
 > {
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        private updateStore: () => void,
-        private removeConnection: (nodeID: string, connection?:{input?:string, output?:string}) => void,
+        private dispatch: (action: NodeAction) => void = ()=>{},
         id?: string,
     ) {
         super(NodeType.GraphDisplay, 600, 400, "Graph Display", id);
@@ -45,8 +44,13 @@ export class GraphDisplayNode extends ParseableBaseNode <
                             this.controls.c.set({shouldAddGroup: false})
                             this.addInputGroup();
                         }
-                        updateNodeRendering(this.id);
-                        updateStore();
+                        dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+                        dispatch(
+                            {
+                                nodeID: this.id,
+                                payload: objectToPayload(this.toParseNode()),
+                                type: NodeActionType.StateChange
+                            });
                     },
                     minimized: false
                 },
@@ -68,9 +72,9 @@ export class GraphDisplayNode extends ParseableBaseNode <
             const group = this.inputs[groupID]?.control as NodeControl<GraphDisplayGroupData>;
             group.setNoUpdate({resultIDs: resultIDs});
         }
-        this.updateStore();
 
-        this.updateNodeRendering?.(this.id);
+        this.dispatch({nodeID: this.id, payload: objectToPayload(this.toParseNode()), type: NodeActionType.StateChange});
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
         return {}
     }
 
@@ -84,11 +88,11 @@ export class GraphDisplayNode extends ParseableBaseNode <
                 onUpdate: (data: Partial<GraphDisplayGroupData>) => {
                     if(data.shouldDelete) {
                         this.removeInput(inputID!);
-                        this.removeConnection(this.id, {input: inputID});
+                        this.dispatch({type: NodeActionType.Disconnect, nodeID: this.id, payload: {input: inputID}})
                     }
 
-                    this.updateNodeRendering(this.id);
-                    this.updateStore();
+                    this.dispatch({type:NodeActionType.UpdateRender, nodeID: this.id})
+                    this.dispatch({type: NodeActionType.StateChange, payload: objectToPayload(this.toParseNode()), nodeID: this.id})
                 },
                 minimized: false,
             },
@@ -149,6 +153,4 @@ export class GraphDisplayNode extends ParseableBaseNode <
             }
         }
     }
-
-    protected updateDataFlow: () => void = () => {}
 }

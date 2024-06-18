@@ -5,6 +5,7 @@ import {ModuleInputControl} from "./moduleControls";
 import {BaseNode} from "../baseNode";
 import {NodeControl} from "../nodeControl";
 import {NumberNodeOutput} from "../types";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 
 export interface ModuleInputControlData {
@@ -22,8 +23,7 @@ export class ModuleInput extends BaseNode<
     value: any = null;
 
     constructor(
-        protected updateNodeRendering: (id: string)=>void,
-        protected updateDataFlow: ()=>void,
+        private dispatch: (action: NodeAction) => void,
         initial?: string,
         id?: string
     ) {
@@ -41,9 +41,9 @@ export class ModuleInput extends BaseNode<
                 onUpdate: (data: Partial<ModuleInputControlData>) => {
                     if(data.value) {
                         this.value = data.value;
-                        this.updateDataFlow();
+                        this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
                     }
-                    this.updateNodeRendering(this.id)
+                    this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
                 },
                 minimized: false
             },

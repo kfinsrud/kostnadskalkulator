@@ -6,6 +6,7 @@ import {BaseNode} from "../baseNode";
 import {NodeControl} from "../nodeControl";
 import {NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {NumberNodeOutput} from "../types";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 
 export interface ModuleOutputControlData {
@@ -22,8 +23,7 @@ export class ModuleOutput extends BaseNode<
     height = 140;
 
     constructor(
-        protected updateNodeRendering: (id: string)=>void,
-        protected updateDataFlow: () => void,
+        private dispatch: (action: NodeAction) => void,
         initialName?: string,
         id?: string
     ) {
@@ -38,7 +38,7 @@ export class ModuleOutput extends BaseNode<
             initialState,
             {
                 onUpdate: () => {
-                    this.updateNodeRendering(this.id)
+                    this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
                 },
                 minimized: false,
             },

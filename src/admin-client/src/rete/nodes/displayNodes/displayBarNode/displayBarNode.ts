@@ -1,11 +1,11 @@
 import {ParseableBaseNode} from "../../parseableBaseNode";
 import {ClassicPreset} from "rete";
-import {NodeType} from "@skogkalk/common/dist/src/parseTree";
-import {DisplayBarNode as ParseDisplayBarNode} from "@skogkalk/common/dist/src/parseTree"
+import {DisplayBarNode as ParseDisplayBarNode, NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {ResultSocket} from "../../../sockets";
 import {NodeControl} from "../../nodeControl";
 import {DisplayBarNodeData} from "./displayBarNodeControlData";
 import {DisplayBarNodeControlContainer} from "./displayBarNodeControlContainer";
+import {NodeAction, NodeActionType, objectToPayload} from "../../../nodeActions";
 
 
 export class DisplayBarNode extends ParseableBaseNode <
@@ -14,8 +14,7 @@ export class DisplayBarNode extends ParseableBaseNode <
     { c: NodeControl<DisplayBarNodeData> }
 > {
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        private updateStore: () => void,
+        private dispatch: (action: NodeAction) => void = ()=>{},
         id?: string,
     ) {
         super(NodeType.BarDisplay, 600, 400, "Bar Chart", id);
@@ -38,9 +37,13 @@ export class DisplayBarNode extends ParseableBaseNode <
                 initialControlData,
                 {
                     onUpdate: () => {
-                        updateNodeRendering(this.id);
-                        updateStore();
-
+                        dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+                        dispatch(
+                            {
+                                nodeID: this.id,
+                                payload: objectToPayload(this.toParseNode()),
+                                type: NodeActionType.StateChange
+                            });
                     },
                     minimized: false
                 },
@@ -53,9 +56,9 @@ export class DisplayBarNode extends ParseableBaseNode <
         const { input } = inputs
         if(input) {
             this.controls.c.setNoUpdate({inputs: input.map((node, index)=>{return { label: node.name, id: node.id, value: node.value, color: node.color, ordering: index}})});
-            this.updateStore();
+            this.dispatch({nodeID: this.id, payload: objectToPayload(this.toParseNode()), type: NodeActionType.StateChange});
         }
-        this.updateNodeRendering?.(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
         return {}
     }
 
@@ -86,6 +89,4 @@ export class DisplayBarNode extends ParseableBaseNode <
             }
         }
     }
-
-    protected updateDataFlow: () => void = () => {}
 }

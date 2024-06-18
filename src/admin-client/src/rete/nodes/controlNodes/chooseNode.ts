@@ -7,6 +7,7 @@ import {NodeControl} from "../nodeControl";
 import {ChooseNodeContainer, ComparisonControlContainer} from "./ChooseNodeContainer";
 import {ChooseNode as ParseChooseNode} from "@skogkalk/common/dist/src/parseTree/nodes/chooseNode";
 import {NumberNodeOutput} from "../types";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 
 interface CompositeControlData {
@@ -24,9 +25,7 @@ export class ChooseNode extends ParseableBaseNode<
     private defaultValue = 0;
 
     constructor(
-        protected updateNodeRendering: (nodeID: string) => void,
-        protected updateDataFlow: () => void,
-        private removeConnection: (nodeId: string, connection?:{input?:string, output?:string}) => Promise<void>,
+        private dispatch: (action: NodeAction)=>void,
         id?: string
     ) {
         super(NodeType.Choose, 400,400, "Choose", id);
@@ -41,7 +40,7 @@ export class ChooseNode extends ParseableBaseNode<
             {
                 onUpdate: () => {
                     this.updateComparisonCount();
-                    this.updateNodeRendering(this.id);
+                    this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
                 },
                 minimized: false
             },
@@ -57,7 +56,7 @@ export class ChooseNode extends ParseableBaseNode<
             this.addNumberedInput(i);
         });
 
-        this.updateNodeRendering(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
     }
 
 
@@ -80,7 +79,7 @@ export class ChooseNode extends ParseableBaseNode<
                 }
             }
         });
-        this.updateNodeRendering(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
         return { out: result ?? {value: this.defaultValue, sourceID: this.id}}
     }
 
@@ -156,8 +155,8 @@ export class ChooseNode extends ParseableBaseNode<
         const input = new ClassicPreset.Input(new NumberSocket());
         const options = {
             onUpdate: () => {
-                this.updateDataFlow();
-                this.updateNodeRendering(this.id);
+                this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
             },
             minimized: false
         };
@@ -172,8 +171,8 @@ export class ChooseNode extends ParseableBaseNode<
     private removeNumberedInput(number: number) {
         const inputName = "input" + number.toString();
         this.removeInput(inputName);
-        this.removeConnection(this.id, {input: inputName});
-        this.updateNodeRendering(this.id);
+        this.dispatch({type: NodeActionType.Disconnect, nodeID: this.id})
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
     }
 
     private getInputControlByIndex(index: number)  {

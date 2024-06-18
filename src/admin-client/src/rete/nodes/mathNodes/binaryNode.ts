@@ -6,6 +6,7 @@ import {NumberSocket} from "../../sockets";
 import {NumberControlComponent} from "./numberControl/numberControlComponent";
 import {NodeControl} from "../nodeControl";
 import {NumberNodeOutput} from "../types";
+import {NodeAction, NodeActionType} from "../../nodeActions";
 
 /**
  * Node for use with any binary math operation, such as +,-, * amd pow.
@@ -20,7 +21,7 @@ export class BinaryNode extends ParseableBaseNode<
 
     constructor(
         type: NodeType,
-        protected updateNodeRendering: (id: string)=>void,
+        private dispatch: (action: NodeAction) => void,
         id?: string,
     ) {
         super(type, 230, 180, type.toString(), id);
@@ -50,7 +51,7 @@ export class BinaryNode extends ParseableBaseNode<
 
         this.controls.c.set({ value })
 
-        this.updateNodeRendering(this.id);
+        this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
 
         return { out: { value: value, sourceID: this.id } };
     }
@@ -71,5 +72,4 @@ export class BinaryNode extends ParseableBaseNode<
         this.controls.c.set(data);
     }
 
-    protected updateDataFlow: () => void = ()=>{}
 }
