@@ -60,7 +60,9 @@ export class NumberInputNode extends ParseableBaseNode<
                         this.height = this.originalHeight + this.controls.c.get('legalValues').length * 74;
                     }
                     this.dispatch({type:NodeActionType.UpdateRender, nodeID: this.id})
-                    this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                    if(newValue.defaultValue !== undefined) {
+                        this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                    }
                     this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload:[]})
                 },
                 minimized: false

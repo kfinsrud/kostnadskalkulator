@@ -7,7 +7,7 @@ import {NodeControl} from "../nodeControl";
 import {ChooseNodeContainer, ComparisonControlContainer} from "./ChooseNodeContainer";
 import {ChooseNode as ParseChooseNode} from "@skogkalk/common/dist/src/parseTree/nodes/chooseNode";
 import {NumberNodeOutput} from "../types";
-import {NodeAction, NodeActionType} from "../../nodeActions";
+import {NodeAction, NodeActionType, objectToPayload} from "../../nodeActions";
 
 
 interface CompositeControlData {
@@ -80,6 +80,8 @@ export class ChooseNode extends ParseableBaseNode<
             }
         });
         this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+
+        this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload: [{key:"value",value: result?.value ?? this.defaultValue}]})
         return { out: result ?? {value: this.defaultValue, sourceID: this.id}}
     }
 

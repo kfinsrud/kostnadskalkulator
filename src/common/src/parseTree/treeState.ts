@@ -190,15 +190,13 @@ export function getResultsForInputs(tree: TreeState, inputID: string, values: nu
  */
 export function getNodeByID(tree: TreeState | undefined, nodeID: string) : ParseNode | undefined {
     if(!tree) { return undefined }
-    let matchNode: ParseNode | undefined;
-    tree.subTrees.forEach((root)=> {
-        forEachNode(root, (n)=>{
-            if(n.id === nodeID) {
-                matchNode = n;
-            }
-        })
-    });
-    return matchNode;
+    for(const root of tree.subTrees) {
+        const match = findNode(root, node=>node.id==nodeID);
+        if(match) {
+            return match;
+        }
+    }
+    return undefined;
 }
 
 export function getInputByName(tree: TreeState, name: string, page?: string) : InputNode | undefined {
@@ -396,4 +394,18 @@ function forEachNode(node: ParseNode, func: (node: ParseNode)=>void) {
     }
 }
 
+function findNode(node: ParseNode, func: (node: ParseNode)=>boolean) : ParseNode | undefined {
+    let nodes = [node];
 
+    while(nodes.length != 0) {
+        const currentNode = nodes.pop();
+        if(currentNode && func(currentNode)) {
+            return currentNode;
+        }
+        if(currentNode?.left)   { nodes.push(currentNode.left); }
+        if(currentNode?.right)  { nodes.push(currentNode.right); }
+        if(currentNode?.child)  { nodes.push(currentNode.child); }
+        if(currentNode?.inputs) { nodes.push(...currentNode.inputs); }
+    }
+    return undefined;
+}

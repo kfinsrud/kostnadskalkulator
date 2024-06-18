@@ -55,6 +55,7 @@ export class NaryNode extends ParseableBaseNode<
         this.controls.c.set({ value });
 
         this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+        this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload: [{key: "value", value: value}]})
 
         return { out: {value: value, sourceID: this.id} };
     }

@@ -8,7 +8,7 @@ import {Presets as ScopesPresets, ScopesPlugin} from "rete-scopes-plugin";
 import {AutoArrangePlugin, Presets as ArrangePresets} from "rete-auto-arrange-plugin";
 import {createParseNodeGraph} from "./adapters";
 import {createRoot} from "react-dom/client";
-import {NodeType, ParseNode, TreeState, treeStateFromData} from "@skogkalk/common/dist/src/parseTree";
+import {getNodeByID, NodeType, ParseNode, TreeState, treeStateFromData} from "@skogkalk/common/dist/src/parseTree";
 import {ItemDefinition} from "rete-context-menu-plugin/_types/presets/classic/types";
 import {ContextMenuExtra, ContextMenuPlugin, Presets as ContextMenuPresets} from "rete-context-menu-plugin";
 import {ModuleEntry, ModuleManager} from "./moduleManager";
@@ -66,9 +66,11 @@ export class Editor {
     private readonly serializer: GraphSerializer;
     private stashedMain: SerializedGraph | undefined;
     public  currentModule: Readonly<string> | undefined;
+    private queuedActions: NodeAction[] = []
 
     public destroyArea = () => {this.context.area.destroy()}
     private currentTreeState?: TreeState
+    private shouldQueueStateChanges = false
 
 
 
@@ -181,39 +183,49 @@ export class Editor {
 
 
     private async dispatchAction(action: NodeAction) {
+        if(this.loading) return;
+
         switch(action.type) {
             case NodeActionType.Disconnect: { // no particular rules.
                 await this.removeNodeConnections(action.nodeID);
             } break;
             case NodeActionType.RecalculateGraph: { // Ikke noe problem per nå. if already updating whole graph, ignore
-                await this.updateDataFlow();
+                await this.updateDataFlow().catch(e=>console.log(e));
             } break;
             case NodeActionType.UpdateRender: { // no particular rules. perhaps pause during dataflow update
                 await this.context.area.update('node', action.nodeID);
             } break;
             case NodeActionType.StateChange: { // tree state change. payload must contain state that has changed.
-                //
-                // const node = getNodeByID(this.currentTreeState, action.nodeID);
-                // if(node == undefined || action.payload == undefined) return;
-                //
-                // for( const { key, value } of action.payload ) {
-                //    if((node as any)[key] != undefined) {
-                //        switch(key) {
-                //            case "id" : break;
-                //            case "inputs" : break;
-                //            case "right" : break;
-                //            case "left" : break;
-                //            default: (node as any)[key] = value; break;
-                //        }
-                //    }
-                // }
-                await this.signalOnChange();
+                if(this.shouldQueueStateChanges) {
+                    this.queuedActions.push(action);
+                    return;
+                }
+                this.updateNodeWithAction(action);
+                this.signalOnChange();
             } break;
         }
 
     }
 
 
+    private updateNodeWithAction(action: NodeAction) {
+        if(action.type != NodeActionType.StateChange) return;
+
+        const node = getNodeByID(this.currentTreeState, action.nodeID);
+        if(node == undefined || action.payload == undefined) return;
+
+        for( const { key, value } of action.payload ) {
+            if((node as any)[key] != undefined) {
+                switch(key) {
+                    case "id" : break;
+                    case "inputs" : break;
+                    case "right" : break;
+                    case "left" : break;
+                    default: (node as any)[key] = value; break;
+                }
+            }
+        }
+    }
 
 
 
@@ -221,10 +233,22 @@ export class Editor {
      * Causes an update of values throughout the tree structure
      */
     private async updateDataFlow() {
+        if(this.loading) return;
+
         this.context.engine.reset();
+        this.shouldQueueStateChanges = true;
         for(const node of this.context.editor.getNodes()) {
             await this.context.engine.fetch(node.id)
         }
+        this.shouldQueueStateChanges = false;
+        // for(const action of this.queuedActions.reverse()) {
+        //     this.updateNodeWithAction(action);
+        //     await this.context.area.update('node', action.nodeID);
+        // }
+        this.queuedActions = [];
+        const trees = await this.exportAsParseTree();
+        this.currentTreeState = treeStateFromData(trees);
+        await this.signalOnChange();
     }
 
 
@@ -284,9 +308,9 @@ export class Editor {
     /**
      * Invokes all callbacks if not in the process of loading a file.
      */
-    private signalOnChange = async ()=> {
+    private async signalOnChange() {
         if(!this.loading && !this.hasModuleLoaded()) {
-            const nodes = await this.exportAsParseTree()
+            const nodes = this.currentTreeState?.subTrees;
             this.onChangeCalls.forEach(({call})=>{
                 call(nodes)
             })
@@ -566,8 +590,12 @@ export class Editor {
                 return;
             }
             if (["connectioncreated", "connectionremoved", "noderemoved", "nodecreated"].includes(context.type)) {
-                this.updateDataFlow();
-                this.signalOnChange();
+                this.updateDataFlow().then(()=>{
+                    this.exportAsParseTree().then(state=>{
+                        this.currentTreeState = treeStateFromData(state);
+                        this.signalOnChange();
+                    })
+                });
             }
             return context;
         });

@@ -49,6 +49,7 @@ export class OutputNode extends ParseableBaseNode <
         const { result } = inputs
         if(result) {
             this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
+            this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload: [{key: "value", value: result[0].value}]})
             this.controls.c.setNoUpdate({value: result[0].value});
         }
         return {

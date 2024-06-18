@@ -34,13 +34,12 @@ export class DropdownInputNode extends ParseableBaseNode<
             infoText: "",
             pageOrdering: 0,
             unit: ""
-
         }
 
         this.addControl("c", new NodeControl(
             initialControlData,
             {
-                onUpdate: () => {
+                onUpdate: (data) => {
                     if(this.controls.c.options.minimized) {
                         this.width = this.originalWidth * 0.5;
                         this.height = this.originalHeight * 0.5;
@@ -49,7 +48,9 @@ export class DropdownInputNode extends ParseableBaseNode<
                         this.height = this.originalHeight + this.controls.c.get('dropdownOptions').length * 74;
                     }
                     this.dispatch({type:NodeActionType.UpdateRender, nodeID: this.id})
-                    this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                    if(data.defaultValue != undefined) {
+                        this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
+                    }
                     this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload: []})
                 },
                 minimized: false
@@ -81,7 +82,7 @@ export class DropdownInputNode extends ParseableBaseNode<
 
     toParseNode() : DropdownInput {
         this.controls.c.setNoUpdate({id: this.id})
-        return { // TODO: Must implement controller
+        return {
             id: this.id,
             value: this.controls.c.get('defaultValue') || 0,
             type: NodeType.DropdownInput,
