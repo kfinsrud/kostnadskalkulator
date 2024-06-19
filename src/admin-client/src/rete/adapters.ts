@@ -161,11 +161,15 @@ export async function flattenGraph(serializer: GraphSerializer, moduleManager: M
     const copySerializer = new GraphSerializer(editor, factory);
     await copySerializer.importNodes(serializer.exportNodes());
 
-    let [moduleNodes, regularNodes] = split(editor.getNodes(), (node)=>{
+    // in case of ModuleInputs or ModuleOutputs in main graph, ignore.
+    const [initialNodes, invalidNodes] = split(editor.getNodes(), n=>!(n instanceof ModuleOutput || n instanceof ModuleInput));
+    const [initialConnections, invalidConnections] = split(editor.getConnections(), conn=>!invalidNodes.some(node=>node.id == conn.target || node.id == conn.source));
+
+    let [moduleNodes, regularNodes] = split(initialNodes, (node)=>{
         return node instanceof ModuleNode;
     });
 
-    let [moduleConnections, regularConnections] = split(editor.getConnections(), (connection)=>{
+    let [moduleConnections, regularConnections] = split(initialConnections, (connection)=>{
         return moduleNodes.find(node=>node.id === connection.target || node.id === connection.source) !== undefined;
     });
 
