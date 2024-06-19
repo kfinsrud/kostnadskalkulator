@@ -70,7 +70,7 @@ export class Editor {
 
     public destroyArea = () => {this.context.area.destroy()}
     private currentTreeState?: TreeState
-    private shouldQueueStateChanges = false
+    private isDataflowUpdateActive = false
 
 
 
@@ -196,7 +196,7 @@ export class Editor {
                 await this.context.area.update('node', action.nodeID);
             } break;
             case NodeActionType.StateChange: { // tree state change. payload must contain state that has changed.
-                if(this.shouldQueueStateChanges) {
+                if(this.isDataflowUpdateActive) {
                     this.queuedActions.push(action);
                     return;
                 }
@@ -233,14 +233,14 @@ export class Editor {
      * Causes an update of values throughout the tree structure
      */
     private async updateDataFlow() {
-        if(this.loading) return;
+        if(this.loading || this.isDataflowUpdateActive) return;
 
         this.context.engine.reset();
-        this.shouldQueueStateChanges = true;
+        this.isDataflowUpdateActive = true;
         for(const node of this.context.editor.getNodes()) {
-            await this.context.engine.fetch(node.id)
+            await this.context.engine.fetch(node.id);
         }
-        this.shouldQueueStateChanges = false;
+        this.isDataflowUpdateActive = false;
         // for(const action of this.queuedActions.reverse()) {
         //     this.updateNodeWithAction(action);
         //     await this.context.area.update('node', action.nodeID);
@@ -248,7 +248,9 @@ export class Editor {
         this.queuedActions = [];
         const trees = await this.exportAsParseTree();
         this.currentTreeState = treeStateFromData(trees);
-        await this.signalOnChange();
+        if(this.currentModule == undefined) {
+            await this.signalOnChange();
+        }
     }
 
 

@@ -7,6 +7,9 @@ import {ModuleNodeControl} from "./moduleControls";
 import {BaseNode} from "../baseNode";
 import {NodeControl} from "../nodeControl";
 import {NodeAction, NodeActionType} from "../../nodeActions";
+import {DataflowEngine} from "rete-engine";
+import {ModuleInput} from "./moduleInput";
+import {ModuleOutput} from "./moduleOutput";
 
 
 export interface ModuleNodeControlData {
@@ -22,6 +25,7 @@ export class ModuleNode extends BaseNode<
 > {
     module: null | Module<Schemes> = null;
     editor: NodeEditor<Schemes> | undefined;
+    engine: DataflowEngine<Schemes> | undefined;
 
     constructor(
         private moduleManager: ModuleManager,
@@ -76,10 +80,12 @@ export class ModuleNode extends BaseNode<
 
         this.dispatch({type: NodeActionType.Disconnect, nodeID: this.id})
         if (this.module) {
-            const editor = new NodeEditor<Schemes>();
-            await this.module.apply(editor);
-            this.editor = editor;
-            const { inputs, outputs } = ModuleManager.getPorts(editor);
+            this.editor = new NodeEditor<Schemes>();
+            this.engine = new DataflowEngine<Schemes>();
+            this.editor.use(this.engine);
+            await this.module.apply(this.editor);
+
+            const { inputs, outputs } = ModuleManager.getPorts(this.editor);
             this.syncPortsWithModule(inputs, outputs);
         } else this.syncPortsWithModule([], []);
     }
@@ -110,13 +116,75 @@ export class ModuleNode extends BaseNode<
     }
 
     async data(inputs: Record<string, any>) {
-        const data = await this.module?.exec(inputs);
+        if(!this.editor || !this.engine) {
+            return;
+        }
+        const data = await this.execute(inputs, this.editor, this.engine);
         Object.keys(data).forEach((key) => {
             data[key] = { value: data[key], sourceID: this.id };
         });
         return data || {};
     }
 
+
+    /**
+     * Injects inputs into module graph and retrieves values of outputs
+     * @param inputs
+     * @param editor
+     * @param engine
+     * @private
+     */
+    private async execute(
+        inputs: Record<string, any>,
+        editor: NodeEditor<Schemes>,
+        engine: DataflowEngine<Schemes>
+    ) {
+        const nodes = editor.getNodes();
+
+        this.injectInputs(nodes, inputs);
+
+        return this.retrieveOutputs(nodes, engine);
+    }
+
+    /**
+     * Injects input values from ModuleNode into inputs in module graph
+     * @param moduleGraph
+     * @param inputData
+     * @private
+     */
+    private injectInputs(moduleGraph: Schemes["Node"][], inputData: Record<string, any>) {
+        const inputNodes = moduleGraph.filter(
+            (node): node is ModuleInput => node instanceof ModuleInput
+        );
+
+        inputNodes.forEach((node) => {
+            const key = node.controls.c.get('inputName');
+            if (key) {
+                node.value = inputData[key] && inputData[key][0].value;
+            }
+        });
+    }
+
+
+    /**
+     * Retrieves outputs in module graph, returning an object of key value pairs for the combined outputs
+     * @param moduleGraph
+     * @param engine
+     * @private
+     */
+    private async retrieveOutputs(moduleGraph: Schemes["Node"][], engine: DataflowEngine<Schemes>) {
+        const moduleOutputs = moduleGraph.filter(
+            (node): node is ModuleOutput => node instanceof ModuleOutput
+        );
+        const moduleOutputKeyWithValues = await Promise.all(
+            moduleOutputs.map(async (outNode) => {
+                const data = await engine.fetchInputs(outNode.id);
+                return [outNode.controls.c.get('outputName') || "", data.value?.[0].value] as const;
+            })
+        );
+
+        return Object.fromEntries(moduleOutputKeyWithValues);
+    }
     serializeControls() {
         return this.controls.c.getData();
     }
