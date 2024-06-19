@@ -8,7 +8,7 @@ import {NumberSocket} from "../../../sockets";
 import {NumberInputControlContainer} from "./numberInputControlContainer";
 import {NodeControl} from "../../nodeControl";
 import {NumberNodeOutput} from "../../types";
-import {NodeAction, NodeActionType} from "../../../nodeActions";
+import {NodeAction, NodeActionType, objectToPayload} from "../../../nodeActions";
 
 
 /**
@@ -63,7 +63,7 @@ export class NumberInputNode extends ParseableBaseNode<
                     if(newValue.defaultValue !== undefined) {
                         this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
                     }
-                    this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload:[]})
+                    this.dispatch({type: NodeActionType.StateChange, nodeID: this.id, payload:objectToPayload(this.toParseNode())})
                 },
                 minimized: false
             },
