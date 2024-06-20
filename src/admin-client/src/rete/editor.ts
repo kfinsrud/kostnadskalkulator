@@ -184,14 +184,6 @@ export class Editor {
 
 
     private async dispatchAction(action: NodeAction) {
-        // console.log({
-        //     action: action.type,
-        //     //@ts-ignore
-        //     payload: action.payload,
-        //     hasModuleLoaded: this.hasModuleLoaded(),
-        //     loading: this.loading,
-        //     isDataflowUpdateActive: this.isDataflowUpdateActive
-        // })
         if(this.loading ) return;
 
         switch(action.type) {
@@ -199,7 +191,7 @@ export class Editor {
                 await this.removeNodeConnections(action.nodeID);
             } break;
             case NodeActionType.RecalculateGraph: { // Ikke noe problem per nå. if already updating whole graph, ignore
-                if(this.hasModuleLoaded()){ // TODO: temporary fix. Must take performance into account when loading new graph.
+                if(this.hasModuleLoaded()){
                     return;
                 }
                 await this.updateDataFlow().catch(e=>console.log(e));
@@ -376,7 +368,7 @@ export class Editor {
         if(!this.hasModuleLoaded()) {
             return this.serializer.exportNodes();
         } else {
-            await this.saveCurrentMainOrModule(this.currentModule); // TODO: Refers back to a function that calls this function.
+            await this.saveCurrentMainOrModule(this.currentModule);
             const tempEditor = new NodeEditor<Schemes>();
             const tempSerializer = new GraphSerializer(tempEditor, new NodeFactory(this.moduleManager));
             if(!this.stashedMain) {
