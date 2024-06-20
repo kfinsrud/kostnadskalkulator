@@ -187,19 +187,19 @@ export class Editor {
         if(this.loading ) return;
 
         switch(action.type) {
-            case NodeActionType.Disconnect: { // no particular rules.
+            case NodeActionType.Disconnect: {
                 await this.removeNodeConnections(action.nodeID);
             } break;
-            case NodeActionType.RecalculateGraph: { // Ikke noe problem per nå. if already updating whole graph, ignore
+            case NodeActionType.RecalculateGraph: {
                 if(this.hasModuleLoaded()){
                     return;
                 }
                 await this.updateDataFlow().catch(e=>console.log(e));
             } break;
-            case NodeActionType.UpdateRender: { // no particular rules. perhaps pause during dataflow update
+            case NodeActionType.UpdateRender: {
                 await this.context.area.update('node', action.nodeID);
             } break;
-            case NodeActionType.StateChange: { // tree state change. payload must contain state that has changed.
+            case NodeActionType.StateChange: {
                 if(this.isDataflowUpdateActive) {
                     this.queuedActions.push(action);
                     return;
