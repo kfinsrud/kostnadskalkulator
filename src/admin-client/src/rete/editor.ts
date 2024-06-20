@@ -117,6 +117,7 @@ export class Editor {
         await this.saveCurrentMainOrModule(this.currentModule);
         this.currentModule = undefined;
         if(this.stashedMain !== undefined) await this.importNodes(this.stashedMain)
+
         this.signalEventAndUpdateSnapshot(EditorEvent.ModulesChanged);
     }
 
@@ -183,13 +184,24 @@ export class Editor {
 
 
     private async dispatchAction(action: NodeAction) {
-        if(this.loading) return;
+        // console.log({
+        //     action: action.type,
+        //     //@ts-ignore
+        //     payload: action.payload,
+        //     hasModuleLoaded: this.hasModuleLoaded(),
+        //     loading: this.loading,
+        //     isDataflowUpdateActive: this.isDataflowUpdateActive
+        // })
+        if(this.loading ) return;
 
         switch(action.type) {
             case NodeActionType.Disconnect: { // no particular rules.
                 await this.removeNodeConnections(action.nodeID);
             } break;
             case NodeActionType.RecalculateGraph: { // Ikke noe problem per nå. if already updating whole graph, ignore
+                if(this.hasModuleLoaded()){ // TODO: temporary fix. Must take performance into account when loading new graph.
+                    return;
+                }
                 await this.updateDataFlow().catch(e=>console.log(e));
             } break;
             case NodeActionType.UpdateRender: { // no particular rules. perhaps pause during dataflow update
@@ -201,7 +213,7 @@ export class Editor {
                     return;
                 }
                 this.updateNodeWithAction(action);
-                this.signalOnChange();
+                this.signalOnChange(action.type);
             } break;
         }
 
@@ -249,7 +261,7 @@ export class Editor {
         const trees = await this.exportAsParseTree();
         this.currentTreeState = treeStateFromData(trees);
         if(this.currentModule == undefined) {
-            await this.signalOnChange();
+            await this.signalOnChange("update dataflow");
         }
     }
 
@@ -310,7 +322,8 @@ export class Editor {
     /**
      * Invokes all callbacks if not in the process of loading a file.
      */
-    private async signalOnChange() {
+    private async signalOnChange(reason?: string ) {
+        console.log("signalOnChange: " + reason);
         if(!this.loading && !this.hasModuleLoaded()) {
             const nodes = this.currentTreeState?.subTrees;
             this.onChangeCalls.forEach(({call})=>{
@@ -334,6 +347,7 @@ export class Editor {
      */
     public async importNodes(data: SerializedGraph) {
         this.loading = true;
+        console.log("import starts");
         try {
             await this.context.editor.clear();
             await this.serializer.importNodes(data);
@@ -343,7 +357,15 @@ export class Editor {
             console.error(e);
             throw e;
         }
+        for(const node of this.context.editor.getNodes()) {
+            await this.context.area.update('node', node.id);
+        }
         this.loading = false;
+        if(!this.hasModuleLoaded()) {
+            this.currentTreeState = treeStateFromData(await this.exportAsParseTree());
+            await this.signalOnChange("main graph load");
+        }
+        console.log("import ends");
     }
 
 
@@ -354,7 +376,7 @@ export class Editor {
         if(!this.hasModuleLoaded()) {
             return this.serializer.exportNodes();
         } else {
-            await this.saveCurrentMainOrModule(this.currentModule);
+            await this.saveCurrentMainOrModule(this.currentModule); // TODO: Refers back to a function that calls this function.
             const tempEditor = new NodeEditor<Schemes>();
             const tempSerializer = new GraphSerializer(tempEditor, new NodeFactory(this.moduleManager));
             if(!this.stashedMain) {
@@ -591,11 +613,13 @@ export class Editor {
             if(context.type === "connectioncreate" && !canCreateConnection(this.context.editor, context.data)) {
                 return;
             }
-            if (["connectioncreated", "connectionremoved", "noderemoved", "nodecreated"].includes(context.type)) {
+            if (["connectioncreated", "connectionremoved", "noderemoved", "nodecreated"].includes(context.type) &&
+                !this.loading
+            ) {
                 this.updateDataFlow().then(()=>{
                     this.exportAsParseTree().then(state=>{
                         this.currentTreeState = treeStateFromData(state);
-                        this.signalOnChange();
+                        this.signalOnChange(context.type);
                     })
                 });
             }
