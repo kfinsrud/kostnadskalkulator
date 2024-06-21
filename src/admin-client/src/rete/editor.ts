@@ -54,8 +54,8 @@ export class Editor {
         currentModule: undefined,
         moduleNames: []
     };
-    private context: EditorContext;
-    private readonly factory: NodeFactory;
+    private context!: EditorContext;
+    private factory!: NodeFactory;
     private eventSubscriptions = {
         ModulesChanged: new Set<any>()
     }
@@ -63,7 +63,7 @@ export class Editor {
     private onChangeCalls: {id: string, call: (nodes?: ParseNode[])=>void}[] = []
     private loading = false;
     private readonly moduleManager: ModuleManager;
-    private readonly serializer: GraphSerializer;
+    private serializer!: GraphSerializer;
     private stashedMain: SerializedGraph | undefined;
     public  currentModule: Readonly<string> | undefined;
     private queuedActions: NodeAction[] = []
@@ -74,20 +74,29 @@ export class Editor {
 
 
 
+
+
     constructor (
-        container: HTMLElement
+        private container: HTMLElement
     ) {
+        this.moduleManager = new ModuleManager();
+        this.initializeEditor();
+        //@ts-ignore
+        AreaExtensions.zoomAt(this.context.area, this.context.editor.getNodes()).then(() => {});
+        this.exportAsParseTree().then(state=>this.currentTreeState=treeStateFromData(state))
+    }
+
+
+    private initializeEditor() {
         this.context = {
             editor: new NodeEditor<Schemes>(),
-            area: new AreaPlugin<Schemes, AreaExtra>(container),
+            area: new AreaPlugin<Schemes, AreaExtra>(this.container),
             engine: new DataflowEngine<Schemes>(),
             connection: new ConnectionPlugin<Schemes, AreaExtra>(),
             render: new ReactPlugin<Schemes, AreaExtra>({ createRoot }),
             arrange:  new AutoArrangePlugin<Schemes>(),
             scopes: new ScopesPlugin<Schemes>()
         };
-
-        this.moduleManager = new ModuleManager();
 
         this.factory = new NodeFactory(
             this.moduleManager,
@@ -107,9 +116,6 @@ export class Editor {
             this.factory,
             this.context.area
         )
-
-        AreaExtensions.zoomAt(this.context.area, this.context.editor.getNodes()).then(() => {});
-        this.exportAsParseTree().then(state=>this.currentTreeState=treeStateFromData(state))
     }
 
 
@@ -158,6 +164,7 @@ export class Editor {
     public async saveCurrentMainOrModule(module: string | undefined) {
         if(module === undefined) {
             this.stashedMain = await this.exportMainGraph();
+            // this.stashedMain = { nodes: [] }
         } else {
             const data = await this.exportCurrentGraph();
             this.moduleManager.setModuleData(module, data);
@@ -184,6 +191,7 @@ export class Editor {
 
 
     private async dispatchAction(action: NodeAction) {
+        console.log(action, this.context.editor.getNode(action.nodeID));
         if(this.loading ) return;
 
         switch(action.type) {
@@ -191,15 +199,15 @@ export class Editor {
                 await this.removeNodeConnections(action.nodeID);
             } break;
             case NodeActionType.RecalculateGraph: {
-                if(this.hasModuleLoaded()){
-                    return;
-                }
                 await this.updateDataFlow().catch(e=>console.log(e));
             } break;
             case NodeActionType.UpdateRender: {
                 await this.context.area.update('node', action.nodeID);
             } break;
             case NodeActionType.StateChange: {
+                if(this.hasModuleLoaded()) {
+                    return;
+                }
                 if(this.isDataflowUpdateActive) {
                     this.queuedActions.push(action);
                     return;
@@ -340,15 +348,12 @@ export class Editor {
     public async importNodes(data: SerializedGraph) {
         this.loading = true;
         console.log("import starts");
-        try {
-            await this.context.editor.clear();
-            await this.serializer.importNodes(data);
-            this.resetView();
-            this.synchronizeModuleNodes();
-        } catch(e) {
-            console.error(e);
-            throw e;
-        }
+        // await this.context.editor.clear();
+        this.context.area.destroy();
+        this.initializeEditor();
+        await this.serializer.importNodes(data);
+        this.resetView();
+        this.synchronizeModuleNodes();
         for(const node of this.context.editor.getNodes()) {
             await this.context.area.update('node', node.id);
         }
@@ -436,7 +441,7 @@ export class Editor {
             return createParseNodeGraph(this.serializer, this.moduleManager);
         } else {
             const tempEditor = new NodeEditor<Schemes>();
-            const tempSerializer = new GraphSerializer(tempEditor, this.factory);
+            const tempSerializer = new GraphSerializer(tempEditor, new NodeFactory(this.moduleManager));
             await tempSerializer.importNodes(this.stashedMain || {nodes: []});
             return createParseNodeGraph(tempSerializer, this.moduleManager);
         }
@@ -666,6 +671,7 @@ export class Editor {
         this.context.area.addPipe((context)=> {
             if(context.type === "nodepicked") {
                 this.selectedNode = context.data.id;
+                console.log(this.context.editor.getNode(context.data.id))
                 this.context.engine.fetchInputs(this.selectedNode);
             }
             if (context.type === "nodetranslated") {
@@ -680,7 +686,6 @@ export class Editor {
     }
 
     private setUpDataflowEngine() {
-
     }
 
 }
