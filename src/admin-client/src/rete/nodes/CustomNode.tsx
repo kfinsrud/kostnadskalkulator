@@ -11,7 +11,7 @@ export const NodeStyles = styled.div<
     NodeExtraData & { selected: boolean; styles?: (props: any) => any }
 >`
   background: ${nodeBackgroundColor};
-  //border: 2px solid grey;
+  border: 2px solid white;
   border-radius: 10px;
   cursor: pointer;
   box-sizing: border-box;
@@ -28,7 +28,8 @@ export const NodeStyles = styled.div<
   ${(props) =>
     props.selected &&
     css`
-      border-color: red;
+      background: #333;
+      border-color: orange;
     `}
   .title {
     color: white;

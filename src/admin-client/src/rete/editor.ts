@@ -522,11 +522,12 @@ export class Editor {
         this.selectedNode = (id != undefined) ? id : this.selectedNode;
         let node = this.context.editor.getNode(this.selectedNode ?? "");
         if(node != undefined) {
+            this.context.area.emit({type:"nodepicked", data: node});
             for( let n of this.context.editor.getNodes() ) {
                 n.selected = n.id == node.id;
+                this.context.area.update('node', n.id);
             }
             //ensures node behaves as if selected by cursor
-            this.context.area.emit({type:"nodepicked", data: node});
             AreaExtensions.zoomAt(this.context.area, [node]).catch(()=>{}).then(() => {});
         }
     }
