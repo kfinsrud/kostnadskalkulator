@@ -1,5 +1,5 @@
 import {Editor, EditorEvent, EditorSnapshot} from "../../rete/editor";
-import {Button, Col, Dropdown, DropdownButton, Modal, NavDropdown, Row} from "react-bootstrap";
+import {Button, Col, Dropdown, Modal, NavDropdown, Row} from "react-bootstrap";
 import React, {useState, useSyncExternalStore} from "react";
 import {ModuleEntry} from "../../rete/moduleManager";
 import {SingleFileUploader} from "../../components/filePicker";
