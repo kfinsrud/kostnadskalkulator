@@ -1,7 +1,6 @@
 import Container from "react-bootstrap/Container";
 import {Col, InputGroup, Row} from "react-bootstrap";
 import {useAppDispatch, useAppSelector} from "../state/hooks";
-import {TextEditor} from "../components/input/textEditor";
 import {selectUnits} from "../state/store";
 import {addUnit, moveUnit, removeUnit, Unit, updateUnit} from "../state/slices/units";
 import parse from 'html-react-parser';
