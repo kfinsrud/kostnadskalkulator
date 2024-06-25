@@ -66,7 +66,6 @@ export class Editor {
     private serializer!: GraphSerializer;
     private stashedMain: SerializedGraph | undefined;
     public  currentModule: Readonly<string> | undefined;
-    private queuedActions: NodeAction[] = []
 
     public destroyArea = () => {this.context.area.destroy()}
     private currentTreeState?: TreeState
@@ -208,10 +207,6 @@ export class Editor {
                 if(this.hasModuleLoaded()) {
                     return;
                 }
-                if(this.isDataflowUpdateActive) {
-                    this.queuedActions.push(action);
-                    return;
-                }
                 this.updateNodeWithAction(action);
                 this.signalOnChange(action.type);
             } break;
@@ -257,7 +252,6 @@ export class Editor {
         //     this.updateNodeWithAction(action);
         //     await this.context.area.update('node', action.nodeID);
         // }
-        this.queuedActions = [];
         const trees = await this.exportAsParseTree();
         this.currentTreeState = treeStateFromData(trees);
         if(this.currentModule == undefined) {
