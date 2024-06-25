@@ -69,6 +69,10 @@ html, body, #root {
   z-index: 1300 !important;
 }
 
+.text-editor-modal {
+  min-width: 50%;
+}
+
 /* avoid applying hover on touch devices that emulate it. Buttons tend to "stick" */
 @media (hover: hover) {
 
