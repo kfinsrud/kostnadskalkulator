@@ -32,6 +32,7 @@ export function OnlineStoragePane(props: {
                     <th>Name</th>
                     <th className={"text-end"}>Version</th>
                     <th className={"text-end"}>Published</th>
+                    <th className={"text-end"}>WIP</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -173,7 +174,8 @@ function TableRow(props: {
                 {isLoading && " (loading...)"}
             </td>
             <td className={"text-end"}>{version}</td>
-            <td className={"text-end"}>{props.calculator.published ? '✓' : ''}</td>
+            <td className={"text-end"}>{(props.calculator.published && !props.calculator.disabled) ? '✓' : ''}</td>
+            <td className={"text-end"}>{props.calculator.disabled ? '✓' :''}</td>
         </tr>
     )
 }
