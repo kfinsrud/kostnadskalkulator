@@ -67,14 +67,14 @@ function SaveToAPI(props: {
     const {authService} = useServices()
 
 
-    const sendToAPI = async (publish: boolean) => {
+    const sendToAPI = async (publish: boolean, developerMode: boolean) => {
         if (!props.calculator.reteSchema?.graph || props.calculator.treeNodes?.length === 1) {
 
             window.alert("Cannot save empty graph to database")
         } else if (!props.calculator.name || !props.calculator.version) {
             window.alert("Cannot save a calculator without a name and version")
         } else {
-            const updatedCalculator = {...props.calculator, published: publish}
+            const updatedCalculator = {...props.calculator, published: publish, disabled: developerMode}
             authService.getToken()
                 .then(token =>
                     addCalculator({calculator: updatedCalculator, token: token})
@@ -118,8 +118,9 @@ function SaveToAPI(props: {
     return (
         <>
             <DropdownButton id={"save options"} as={ButtonGroup} title={isLoading ? "Exporting..." : "Export"} style={{height: '58px'}}>
-                <Dropdown.Item onClick={() => sendToAPI(false)}>Save only</Dropdown.Item>
-                <Dropdown.Item onClick={() => sendToAPI(true)}>Save and publish</Dropdown.Item>
+                <Dropdown.Item onClick={() => sendToAPI(false, false)}>Save only</Dropdown.Item>
+                <Dropdown.Item onClick={() => sendToAPI(true, false)}>Save and publish</Dropdown.Item>
+                <Dropdown.Item onClick={() => sendToAPI(true, true)}>Save and publish as WIP</Dropdown.Item>
             </DropdownButton>
         </>
     )
