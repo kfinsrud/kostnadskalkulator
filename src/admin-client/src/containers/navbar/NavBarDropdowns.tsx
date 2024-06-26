@@ -9,6 +9,16 @@ import React, {useState} from "react";
 import {ImportExportModal} from "../importExportModal/ImportExportModal";
 import {EditorDataPackage} from "../../rete/editor";
 
+
+function DropdownItemWithKeyBind(
+    props: { name: string, keyBind: string }
+) {
+
+    return <div style={{justifyContent: "space-between", display: "flex"}}>
+        <div>{props.name}</div><div style={{color: "gray"}}>{props.keyBind}</div>
+    </div>
+}
+
 /**
  * The dropdown menu items for the navigation bar
  */
@@ -47,7 +57,14 @@ export function NavBarDropdowns(props: {functions: ReteFunctions | null}) {
             <NavDropdown title={"View"} id={"view-dropdown"}>
                 <NavDropdown.Item onClick={() => {
                     props.functions?.viewControllers.resetView();
-                }}>Reset</NavDropdown.Item>
+                }}><DropdownItemWithKeyBind name={"View all"} keyBind={"ctrl+a"}/></NavDropdown.Item>
+                <NavDropdown.Item
+                    onClick={()=>{
+                        props.functions?.viewControllers.focusSelectedNode();
+                    }}
+                >
+                    <DropdownItemWithKeyBind name={"Focus SEL"} keyBind={"ctrl+f"}/>
+                </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title={"Test"} id={"file-dropdown"}>
                 <NavDropdown.Item onClick={() => {
