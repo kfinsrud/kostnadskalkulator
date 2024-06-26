@@ -7,7 +7,7 @@ import {DisplayArrangementSettings} from "./DisplayArrangementSettings";
 import {NodeSearchParent} from "./NodeSearch";
 import {ReteFunctions} from "../../rete/createEditor";
 import {useState} from "react";
-import {MdNavigateBefore, MdNavigateNext} from "react-icons/md";
+import {MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight} from "react-icons/md";
 
 export function SidePanel(
     props: { reteFunctions: ReteFunctions | null }
@@ -53,8 +53,8 @@ export function SidePanel(
                         window.removeEventListener("dragover", handleMouseMove);
                     }}
                 >
-                    {show?<MdNavigateNext size={22} style={hovering?{filter:"drop-shadow( 0 0 2px)"}:{}}></MdNavigateNext>
-                        : <MdNavigateBefore size={22} style={hovering?{filter:"drop-shadow( 0 0 2px)"}:{}}></MdNavigateBefore>}
+                    {show?<MdKeyboardDoubleArrowRight size={22} style={hovering?{filter:"drop-shadow( 0 0 2px)"}:{}}></MdKeyboardDoubleArrowRight>
+                        : <MdKeyboardDoubleArrowLeft size={22} style={hovering?{filter:"drop-shadow( 0 0 2px)"}:{}}></MdKeyboardDoubleArrowLeft>}
                 </Col>
                 {show && <Col>
                     <Tabs>
