@@ -17,6 +17,7 @@ function App() {
                 <DevelopmentHeaderWarning />
                 <Routes>
                     <Route element={<NavBar />}>
+                        <Route path={"/dev"} element={<StartPage developerMode={true} />}/>
                         <Route path={"/"} element={<StartPage />}/>
                         <Route path={"/kalkulator/:name/:version"} element={<CalculatorPage />}/>
                         <Route path="/forskningsgrunnlag" element={<InformationalScientificSourcesPage />} />

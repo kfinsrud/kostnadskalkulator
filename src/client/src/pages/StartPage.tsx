@@ -2,7 +2,9 @@ import {Button, Card, Col, Row} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 import {useGetCalculatorsInfoQuery} from "../state/store";
 
-export function StartPage() {
+export function StartPage(
+    props: { developerMode?: boolean }
+) {
     return (
             <Card className={"pt-5"}>
                 <Card.Body>
@@ -17,7 +19,7 @@ export function StartPage() {
                                         <p>{"Kalkulatoren gir en prognose på tidsbruk og kostnader basert på skogtype, driftsforhold og hvordan drifta er tilrettelagt."}</p>
                                     </Row>
                                     <Row className={"mb-5"}>
-                                        <CalculatorPicker/>
+                                        <CalculatorPicker developerMode={props.developerMode}/>
                                     </Row>
                                     <hr style={{color: "darkgray"}}/>
                                     <i>
@@ -37,7 +39,9 @@ export function StartPage() {
     )
 }
 
-function CalculatorPicker() {
+function CalculatorPicker(
+    props: { developerMode?: boolean }
+) {
     const navigate = useNavigate()
     const {data, error, isLoading} = useGetCalculatorsInfoQuery()
 
@@ -49,13 +53,13 @@ function CalculatorPicker() {
             {error && <p>{"En feil oppstod ved henting av kalkulatorer"}</p>}
             {data &&
                 <Row className={"row-gap-4"}>
-                    {data.map((calculator) => {
+                    {data.filter(c=>!props.developerMode || c.disabled==true).map((calculator) => {
                         return (
                             <Col xs={6}>
                                 <CalculatorButton
                                     title={calculator.name}
                                     onclick={() => {navigate(`/kalkulator/${encodeURI(calculator.name)}/${calculator.version}`)}}
-                                    disabled={calculator.disabled}/>
+                                    disabled={!props.developerMode && calculator.disabled}/>
                             </Col>
                         )
                     })}
@@ -68,7 +72,8 @@ function CalculatorPicker() {
 function CalculatorButton(props: {
     title: string,
     onclick: () => void,
-    disabled: boolean}) {
+    disabled: boolean
+}) {
     return (
         <Button
             variant={"secondary"}
