@@ -1,10 +1,10 @@
 import {Editor, EditorEvent, EditorSnapshot} from "../../rete/editor";
-import {Button, Col, Dropdown, Modal, NavDropdown, Row} from "react-bootstrap";
+import {Button, Col, Dropdown, Modal, NavDropdown, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
 import React, {useState, useSyncExternalStore} from "react";
 import {ModuleEntry} from "../../rete/moduleManager";
 import {SingleFileUploader} from "../../components/filePicker";
 import Container from "react-bootstrap/Container";
-import {MdArrowBack} from "react-icons/md";
+import {MdAdd, MdArrowBack, MdDelete, MdDownload, MdDriveFileRenameOutline, MdUpload} from "react-icons/md";
 
 
 export function ModulePanel( props: { editor: Editor | undefined }) {
@@ -55,6 +55,24 @@ function ModuleSelection(props: { editor: Editor, editorSnapshot: EditorSnapshot
     </NavDropdown>
 }
 
+function SimpleTooltipButton(
+    props: {
+        buttonContent: JSX.Element
+        tooltip: string
+        onClick: () => void
+        disabled?: boolean
+    }
+){
+    return <OverlayTrigger overlay={<Tooltip>{props.tooltip}</Tooltip>}>
+        <Button
+            onClick={props.onClick}
+            disabled={props.disabled}
+        >
+            {props.buttonContent}
+        </Button>
+    </OverlayTrigger>
+}
+
 function ModulePanelContents( props: { editor: Editor }) {
 
     let moduleSnapshot = useSyncExternalStore(
@@ -66,8 +84,52 @@ function ModulePanelContents( props: { editor: Editor }) {
 
     const mainLoaded = () => { return !props?.editor.hasModuleLoaded() }
 
-    return <Container style={{ position: "absolute", zIndex: 10, width: "auto"}}
-    >
+    const handleModuleRename = ()=>{
+        const newName = prompt("New name");
+        if(newName === "" || newName === 'main' || newName === null) return;
+        props.editor?.renameCurrentModule(newName);
+    }
+
+
+    const handleDeleteModule = () =>{
+        const verified = window.confirm(`Delete module ${props.editor.currentModule}?`);
+        if(!verified) return;
+        props.editor.deleteModule(props.editor.currentModule!).then().catch(()=>{
+        });
+    }
+    const handleFileUpload = (file?: File) => {
+        if(file && file.name.endsWith(".json")) {
+            file.text()
+                .then( (contents)=> {
+                    const data = JSON.parse(contents);
+                    if(data.data && data.name) {
+                        props.editor?.addNewModule(data.name, data.data);
+                    }
+                })
+                .catch(()=>{
+                    window.prompt("File could not be processed.");
+                })
+        }
+        setShowUploadModal(false);
+    }
+
+    const handleNewModule = () =>{
+        const name = prompt("Module name");
+        if(name) {
+            props.editor?.addNewModule(name);
+        }
+    }
+
+    const handleFileDownload = () =>{
+        props.editor?.exportCurrentGraph()
+            .then((data)=>{
+                downloadModule(moduleSnapshot.currentModule!,
+                    { name: moduleSnapshot.currentModule!, data: data});
+            });
+    }
+
+
+    return <Container style={{ position: "absolute", zIndex: 10, width: "auto"}}>
         <Row
             style={{background: "white", width:"auto", boxShadow: "0px 0px 5px gray", borderRadius:"5px", padding:"2px"}}
             className={"align-items-center justify-content-start"}
@@ -75,14 +137,6 @@ function ModulePanelContents( props: { editor: Editor }) {
             <Col sm={"auto"} >
                 <b>Modules</b>
             </Col>
-            {moduleSnapshot.currentModule && <Col sm={"auto"}>
-                <Button
-                    disabled={!props.editor?.hasModuleLoaded()}
-                    onClick={ ()=>{
-                        props.editor?.loadMainGraph();
-                    }}
-                ><MdArrowBack/></Button>
-            </Col>}
             <Col sm={"auto"}>
                 <ModuleSelection
                     editor={props.editor}
@@ -90,56 +144,48 @@ function ModulePanelContents( props: { editor: Editor }) {
                 ></ModuleSelection>
             </Col>
             <Col sm={"auto"}>
-                <Button onClick={()=>{
-                    const name = prompt("Module name");
-                    if(name) {
-                        props.editor?.addNewModule(name);
-                    }
-                }}>new</Button>
-                <Button disabled={mainLoaded()} onClick={()=>{
-                    props.editor.deleteModule(props.editor.currentModule!).then().catch(()=>{
-                        prompt("No module with that name found");
-                    });
-                }}>delete</Button>
-                <Button disabled={mainLoaded()} onClick={()=>{
-                    const newName = prompt("New name");
-                    if(newName === "" || newName === 'main' || newName === null) return;
-                    props.editor?.renameCurrentModule(newName);
-                }}>rename</Button>
-                <Button
+                <SimpleTooltipButton
+                    buttonContent={<MdArrowBack/>}
+                    tooltip={"Return to main graph"}
+                    onClick={()=>{props.editor?.loadMainGraph()}}
+                    disabled={!props.editor?.hasModuleLoaded()}
+                />
+                <SimpleTooltipButton
+                    buttonContent={<MdAdd/>}
+                    tooltip={"Add new module"}
+                    onClick={handleNewModule}
+                />
+                <SimpleTooltipButton
+                    buttonContent={<MdDelete/>}
+                    tooltip={"Delete current module"}
+                    onClick={handleDeleteModule}
+                    disabled={!props.editor?.hasModuleLoaded()}
+                />
+                <SimpleTooltipButton
+                    buttonContent={<MdDriveFileRenameOutline/>}
+                    tooltip={"Rename module"}
+                    onClick={handleModuleRename}
+                    disabled={!props.editor?.hasModuleLoaded()}
+                />
+                <SimpleTooltipButton
+                    buttonContent={<MdDownload></MdDownload>}
+                    tooltip={"Download module"}
+                    onClick={handleFileDownload}
                     disabled={mainLoaded()}
+                />
+                <SimpleTooltipButton
+                    buttonContent={<MdUpload></MdUpload>}
+                    tooltip={"Upload module"}
                     onClick={()=>{
-                        props.editor?.exportCurrentGraph()
-                            .then((data)=>{
-                                console.log("exporting", data);
-                                downloadModule(moduleSnapshot.currentModule!,
-                                    { name: moduleSnapshot.currentModule!, data: data});
-                            });
-                    }}
-                >Export</Button>
-                <Button
-                    onClick={()=>{setShowUploadModal(true)}}
-                >import</Button>
+                        setShowUploadModal(true);
+                    }} disabled={false}
+                />
                 <Modal
                     onHide={()=>{}}
                     show={showUploadModal}
                 >
-                    <SingleFileUploader handleFile={(file)=>{
-                        if(file && file.name.endsWith(".json")) {
-                            file.text()
-                                .then( (contents)=> {
-                                    const data = JSON.parse(contents);
-                                    console.log(data);
-                                    if(data.data && data.name) {
-                                        props.editor?.addNewModule(data.name, data.data);
-                                    }
-                                })
-                                .catch((
-
-                                )=>{})
-                        }
-                        setShowUploadModal(false);
-                    }}
+                    <SingleFileUploader
+                        handleFile={handleFileUpload}
                         abort={()=>{setShowUploadModal(false)}}
                     />
                 </Modal>
