@@ -18,6 +18,7 @@ import {canCreateConnection} from "./sockets";
 import {ModuleNode} from "./nodes/moduleNodes/moduleNode";
 import {CustomNode} from "./nodes/CustomNode";
 import {NodeAction, NodeActionType} from "./nodeActions";
+import {HistoryActions, HistoryExtensions, HistoryPlugin, Presets as HistoryPresets} from "rete-history-plugin";
 
 
 export type AreaExtra = ReactArea2D<Schemes> | ContextMenuExtra;
@@ -33,6 +34,7 @@ export interface EditorSnapshot {
 }
 
 export interface EditorContext {
+    history: HistoryPlugin<Schemes, HistoryActions<Schemes>>
     editor: NodeEditor<Schemes>,
     area: AreaPlugin<Schemes,  AreaExtra>,
     connection: ConnectionPlugin<Schemes, AreaExtra>,
@@ -88,6 +90,7 @@ export class Editor {
 
     private initializeEditor() {
         this.context = {
+            history: new HistoryPlugin<Schemes, HistoryActions<Schemes>>(),
             editor: new NodeEditor<Schemes>(),
             area: new AreaPlugin<Schemes, AreaExtra>(this.container),
             engine: new DataflowEngine<Schemes>(),
@@ -109,6 +112,7 @@ export class Editor {
         this.setUpRendering();
         this.setUpScopes();
         this.setUpAutoArrange();
+        this.setUpHistory();
 
         this.serializer = new GraphSerializer(
             this.context.editor,
@@ -651,6 +655,11 @@ export class Editor {
         this.context.arrange.addPreset(ArrangePresets.classic.setup());
     }
 
+    private setUpHistory() {
+        this.context.history.addPreset(HistoryPresets.classic.setup())
+        HistoryExtensions.keyboard(this.context.history)
+    }
+
 
     private setUpArea() {
         this.context.area.use(this.context.connection);
@@ -658,6 +667,7 @@ export class Editor {
         this.context.area.use(this.context.render);
         this.context.area.use(this.context.scopes);
         this.context.area.use(this.context.arrange);
+        this.context.area.use(this.context.history);
 
         AreaExtensions.selectableNodes(this.context.area, AreaExtensions.selector(), {
             accumulating: AreaExtensions.accumulateOnCtrl()
