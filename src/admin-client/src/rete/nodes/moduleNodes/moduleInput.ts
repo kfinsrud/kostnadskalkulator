@@ -39,7 +39,7 @@ export class ModuleInput extends BaseNode<
             initialState,
             {
                 onUpdate: (data: Partial<ModuleInputControlData>) => {
-                    if(data.value) {
+                    if(data.value !== undefined) {
                         this.value = data.value;
                         this.dispatch({type: NodeActionType.RecalculateGraph, nodeID: this.id})
                     }
