@@ -117,7 +117,7 @@ export class ModuleNode extends BaseNode<
 
     async data(inputs: Record<string, any>) {
         if(!this.editor || !this.engine) {
-            return;
+            return {};
         }
         const data = await this.execute(inputs, this.editor, this.engine);
         Object.keys(data).forEach((key) => {
