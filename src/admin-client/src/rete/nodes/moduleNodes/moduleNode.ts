@@ -141,6 +141,7 @@ export class ModuleNode extends BaseNode<
     ) {
         const nodes = editor.getNodes();
 
+        this.engine?.reset();
         this.injectInputs(nodes, inputs);
 
         return this.retrieveOutputs(nodes, engine);
