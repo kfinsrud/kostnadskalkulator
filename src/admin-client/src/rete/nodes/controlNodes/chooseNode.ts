@@ -102,7 +102,7 @@ export class ChooseNode extends ParseableBaseNode<
         };
     }
 
-    private getComparisonControls() {
+    public getComparisonControls() {
         const controls: ChooseNodeComparisonData[] = [];
         this.forComparisonCount((i)=> {
             const inputControl = this.getInputControlByIndex(i);
@@ -177,7 +177,7 @@ export class ChooseNode extends ParseableBaseNode<
         this.dispatch({type: NodeActionType.UpdateRender, nodeID: this.id})
     }
 
-    private getInputControlByIndex(index: number)  {
+    public getInputControlByIndex(index: number)  {
         return this.inputs["input"+index.toString()]?.control as NodeControl<ChooseNodeComparisonData> | undefined;
     }
 
