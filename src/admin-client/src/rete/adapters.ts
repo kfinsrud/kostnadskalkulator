@@ -7,6 +7,7 @@ import {ModuleOutput} from "./nodes/moduleNodes/moduleOutput";
 import {GraphSerializer} from "./graphSerializer";
 import {NodeFactory} from "./nodeFactory";
 import {ModuleManager} from "./moduleManager";
+import {ChooseNode} from "./nodes/controlNodes/chooseNode";
 
 
 interface NodeConnection {
@@ -52,7 +53,7 @@ export function detectModule(name: string, nodes: ReteNode[]) {
  * @param moduleNode
  * @param externalIOConnections
  */
-export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  externalIOConnections: ConnProps[]) {
+export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  externalIOConnections: ConnProps[], externalNodes: ReteNode[]) {
     const internalNodes = moduleNode.getNodes();
     const internalIOConnections = moduleNode.getConnections();
     const resolvedInputConnections : ConnProps[] = []
@@ -97,6 +98,13 @@ export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  extern
                             sourceOutput: inputConnection.sourceOutput,
                             targetInput: connectionFromModuleInput.targetInput
                         })
+                        if(moduleInputTargetNode.type === NodeType.Choose) {
+                            const comparisons = (moduleInputTargetNode as ChooseNode).getComparisonControls();
+                            const oldComparison = comparisons.find( c => c.sourceID === inputConnection.target);
+                            if(oldComparison) {
+                                oldComparison.sourceID = inputConnection.source;
+                            }
+                        }
                     }
                 } else {
                     throw new Error ("resolveIncomingModuleConnections: targeted node does not exist in internalIONodes")
@@ -111,7 +119,7 @@ export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  extern
         // only interested in resolving a connection if it goes to a regular node in the module.
         // Other cases are handled in the input connection resolution.
         const moduleOutputNode = internalNodes
-            .find(node=>
+            .find( node =>
                 outputConnection.sourceOutput === (node as ModuleOutput).controls.c.get('outputName')
             );
         if(moduleOutputNode) {
@@ -131,6 +139,18 @@ export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  extern
                 sourceOutput: moduleOutputInternalConnection.sourceOutput,
                 targetInput: outputConnection.targetInput
             })
+            const targetNode = externalNodes.find(n=>n.id === outputConnection.target);
+            if(targetNode && targetNode.type === NodeType.Choose) {
+                if(outputConnection.targetInput.startsWith("input")) {
+                    const inputNumber = (outputConnection.targetInput || "").replace("input", "");
+                    const nr = Number.parseInt(inputNumber);
+                    console.log("intputnr", inputNumber);
+                    const control = (targetNode as ChooseNode).getInputControlByIndex(nr);
+                    if(control) {
+                        control.setNoUpdate({sourceID: moduleOutputInternalConnection.source})
+                    }
+                }
+            }
         }
     });
 
@@ -163,7 +183,7 @@ export async function flattenGraph(serializer: GraphSerializer, moduleManager: M
 
     // in case of ModuleInputs or ModuleOutputs in main graph, ignore.
     const [initialNodes, invalidNodes] = split(editor.getNodes(), n=>!(n instanceof ModuleOutput || n instanceof ModuleInput));
-    const [initialConnections, invalidConnections] = split(editor.getConnections(), conn=>!invalidNodes.some(node=>node.id == conn.target || node.id == conn.source));
+    const [initialConnections] = split(editor.getConnections(), conn=>!invalidNodes.some(node=>node.id == conn.target || node.id == conn.source));
 
     let [moduleNodes, regularNodes] = split(initialNodes, (node)=>{
         return node instanceof ModuleNode;
@@ -198,7 +218,7 @@ export async function flattenGraph(serializer: GraphSerializer, moduleManager: M
         })
 
         // resolve connections from nodes connected to module
-        const resolvedConnections = resolveIncomingModuleConnections(moduleNode as ModuleNode, currentModuleConnections);
+        const resolvedConnections = resolveIncomingModuleConnections(moduleNode as ModuleNode, currentModuleConnections, regularNodes);
         // sort resolvedConnections into regular connections or module connections.
         for(const connection of resolvedConnections) {
             const node = moduleNodes.find((node)=>{
