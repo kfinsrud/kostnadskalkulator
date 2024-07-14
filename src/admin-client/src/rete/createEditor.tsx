@@ -1,4 +1,4 @@
-import {ParseNode} from "@skogkalk/common/dist/src/parseTree";
+import {ParseNode, treeStateFromData} from "@skogkalk/common/dist/src/parseTree";
 import {Editor, EditorDataPackage} from "./editor";
 
 /**
@@ -50,7 +50,9 @@ export async function createEditor(container: HTMLElement) {
             }
         },
         testJSON: () => {
-            editor.exportAsParseTree().then(data=>console.log(data));
+            editor.exportAsParseTree().then(
+                data=>console.log(treeStateFromData(data)?.subTrees)
+            );
         },
         deleteSelected: async () => {
             editor.deleteSelected().then();
