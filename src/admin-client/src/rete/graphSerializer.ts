@@ -4,6 +4,8 @@ import {AreaPlugin} from "rete-area-plugin";
 import {NumberNode} from "./nodes/mathNodes/numberNode";
 import {BinaryNode} from "./nodes/mathNodes/binaryNode";
 import {NodeFactory} from "./nodeFactory";
+import {NodeType} from "@skogkalk/common/dist/src/parseTree";
+import {ChooseNode} from "./nodes/controlNodes/chooseNode";
 
 export interface SerializedNode {
     id: string;
@@ -88,6 +90,18 @@ export class GraphSerializer {
                             return;
                         }
                     });
+            }
+
+            if(freshIDs) {
+                for(const node of this.editor.getNodes()) {
+                    if(node.type === NodeType.Choose) {
+                        const count =(node as ChooseNode).controls.c.get('comparisonCount');
+                        for(let i = 0; i < count; i++) {
+                            const control = (node as ChooseNode).getInputControlByIndex(i);
+                            control?.set({sourceID: oldToNewIDMapping.get(control?.get('sourceID') || "")})
+                        }
+                    }
+                }
             }
 
             resolve(); return;
