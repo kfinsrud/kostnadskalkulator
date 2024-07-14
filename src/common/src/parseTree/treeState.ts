@@ -285,11 +285,11 @@ function calculateNodeValue(tree: TreeState, node: ParseNode | undefined): numbe
                 break;
             case NodeType.Choose: result = (() => {
                 const leftHand = calculateNodeValue(tree, node.left);
-                const firstMatch = (node as ChooseNode).comparisons.findIndex((comparison)=>{
+                const firstMatch = (node as ChooseNode).comparisons.find((comparison)=>{
                     return compare(leftHand, comparison.rh, comparison.comparison);
-                })
+                });
                 if(firstMatch !== undefined) {
-                    return calculateNodeValue(tree, (node as ChooseNode).inputs[firstMatch]);
+                    return calculateNodeValue(tree, getNodeByID(tree, firstMatch.resultNodeID));
                 } else {
                     return calculateNodeValue(tree, node.right);
                 }
