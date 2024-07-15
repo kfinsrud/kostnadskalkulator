@@ -1,4 +1,4 @@
-import {t_harv_ccf_fj94, TreatmentType} from "../src/nyFormel";
+import {patchHarvestFJ, selectionHarvestFJ, t_forw_bb} from "../src/nyFormel";
 
 
 test('Lukket hogst1', ()=>{
@@ -12,10 +12,9 @@ test('Lukket hogst1', ()=>{
     const surface = 1;
 
 
-    const result = t_harv_ccf_fj94(
+    const result = patchHarvestFJ(
         stemsPerHectare,
         middleStem,
-        TreatmentType.PATCH_HARVEST,
         harvestStrengthPercent,
         patchSizeInHectare,
         stripRoadWidth,
@@ -36,10 +35,9 @@ test('Lukket hogst2', ()=>{
     const surface = 1;
 
 
-    const result = t_harv_ccf_fj94(
+    const result = patchHarvestFJ(
         stemsPerHectare,
         middleStem,
-        TreatmentType.PATCH_HARVEST,
         harvestStrengthPercent,
         patchSizeInHectare,
         stripRoadWidth,
@@ -60,10 +58,9 @@ test('Lukket hogst3', ()=>{
     const surface = 1;
 
 
-    const result = t_harv_ccf_fj94(
+    const result = selectionHarvestFJ(
         stemsPerHectare,
         middleStem,
-        TreatmentType.SINGLE_TREE_SELECTION,
         harvestStrengthPercent,
         patchSizeInHectare,
         stripRoadWidth,
@@ -85,10 +82,9 @@ test('Lukket hogst4', ()=>{
     const surface = 2;
 
 
-    const result = t_harv_ccf_fj94(
+    const result = selectionHarvestFJ(
         stemsPerHectare,
         middleStem,
-        TreatmentType.SINGLE_TREE_SELECTION,
         harvestStrengthPercent,
         patchSizeInHectare,
         stripRoadWidth,
@@ -99,3 +95,42 @@ test('Lukket hogst4', ()=>{
     console.log(result);
     expect(result.toFixed(3)).toEqual("18.273")
 })
+
+
+test('forwarder', ()=>{
+    const result = t_forw_bb(
+        "large",
+        "Brunberg04",
+        "clearcutting",
+        100,
+        1,
+        1,
+        1,
+        700,
+        0,
+        300,
+        4
+    )
+
+    expect(result).toEqual(33.21);
+})
+
+test('forwarder', ()=>{
+    const result = t_forw_bb(
+        "small",
+        "Brunberg04",
+        "thinning",
+        100,
+        1,
+        1,
+        0.2,
+        700,
+        0,
+        500,
+        3
+    )
+
+    expect(result).toEqual(11.41);
+})
+
+

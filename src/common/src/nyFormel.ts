@@ -3,7 +3,7 @@ export enum TreatmentType {
     SINGLE_TREE_SELECTION = "SINGLE_TREE_SELECTION",
 }
 
-function trunk_rng( // Utydelig for meg hvor denne kommer fra?
+function trunk_rng(
     trunk: number,
     min: number,
     max: number
@@ -11,20 +11,33 @@ function trunk_rng( // Utydelig for meg hvor denne kommer fra?
     return Math.max(min, Math.min(max, trunk));
 }
 
-//TODO: Bruker nåværende formel m3fub for middelstamme, eller er det noe helt annet?
-/*
-m3sk Tree stem volume above the felling cut. Includes bark and top of the tree, but not branches.
-m3fub Volume of log(s) excluding bark.
-m3fpb Volume of log(s) including bark.
-m3to Volume of log(s) as given by a cylinder, with diameter = top diameter of the log under bark.
- */
+function sr_sp_patch(
+    sr_w: number,
+    harvest_fraction: number,
+    ptch_w: number
+) {
+    console.log({
+        sr_w: sr_w,
+        harvest_fraction: harvest_fraction,
+        ptch_w: ptch_w
+    })
+    const result = (
+            Math.sqrt(
+                sr_w * sr_w
+                - 4 * sr_w * harvest_fraction * ptch_w
+                + 4 * harvest_fraction * (ptch_w*ptch_w)
+            )
+            + sr_w
+        ) / (2 * harvest_fraction)
+    console.log(result);
+    return result;
+}
 
 
-export function t_harv_ccf_fj94(
+export function patchHarvestFJ(
     stems_ha: number = 1200,
     v: number = 0.4,
-    treatment: TreatmentType = TreatmentType.PATCH_HARVEST,
-    harvest_strength_pct: number = 45, // share of basal area to be cut
+    harvest_strength_pct: number = 45,
     patch_size_ha: number = 0.6,
     sr_w: number = 4,
     stripRoadExists: boolean = true,
@@ -32,112 +45,79 @@ export function t_harv_ccf_fj94(
     surface: number = 1
 ) {
     let vharv = stems_ha * v * harvest_strength_pct / 100;
+    patch_size_ha = trunk_rng(patch_size_ha, 0.01, 0.5);
+    const ptch_w = Math.sqrt(patch_size_ha) * 100;
+    const sr_sp = sr_sp_patch(
+        sr_w,
+        harvest_strength_pct / 100,
+        ptch_w
+    )
 
-    if(treatment === TreatmentType.PATCH_HARVEST) {
-        patch_size_ha = trunk_rng(patch_size_ha, 100/10000, 0.5);
-        const ptch_w = Math.sqrt(patch_size_ha) * 100;
-        console.log(patch_size_ha);
-        console.log(ptch_w);
-        const sr_sp =
-            (
-                Math.sqrt(
-                    sr_w*sr_w
-                    - 4 * sr_w* (harvest_strength_pct / 100) * ptch_w
-                    + 4 * (harvest_strength_pct / 100) * (ptch_w*ptch_w)
-                )
-                + sr_w
-            )
-            /
-            (2 * (harvest_strength_pct/100))
+    const sr_share_harvest_area = (sr_sp - ptch_w) * sr_w / (harvest_strength_pct * sr_sp*sr_sp /100);
+    const nharv_sr = stripRoadExists? 0 : sr_share_harvest_area * stems_ha;
+    const vharv_sr = nharv_sr * v;
+    const v_sr = stripRoadExists? 0 : vharv_sr / nharv_sr;
+    const vharv_bsr = vharv - vharv_sr;
+    const v_bsr = v;
+    const nharv_bsr = vharv_bsr / v_bsr;
+    const nharv = nharv_bsr + nharv_sr;
 
-        console.log(sr_sp);
-
-        const sr_share_harvest_area =
-            (sr_sp - ptch_w) *
-            sr_w / (harvest_strength_pct * sr_sp*sr_sp /100);
-        // const sr_share_tot_area =
-        //     (sr_sp * ptch_w) *
-        //     sr_w / (sr_sp**2);
-
-        const nharv_sr =
-            stripRoadExists? 0 : sr_share_harvest_area * stems_ha;
-        const vharv_sr = nharv_sr * v;
-        const v_sr =
-            stripRoadExists? 0 : vharv_sr / nharv_sr;
-
-        const vharv_bsr =
-            vharv - vharv_sr;
-        const v_bsr = v;
-        const nharv_bsr = vharv_bsr / v_bsr;
-        const nharv = nharv_bsr + nharv_sr;
-        console.log({
-            sr_share_harvest_area: sr_share_harvest_area,
-            v_sr: v_sr,
-            nharv_sr: nharv_sr,
-            vharv_bsr: vharv_bsr,
-            vharv_sr: vharv_sr,
-            v_bsr: v_bsr,
-        })
-
-        return getHarvestTime(
-            v_bsr, // v_bsr alltid lik v?
-            harvest_strength_pct,
-            vharv,
-            vharv_sr,
-            vharv_bsr,
-            v,
-            v_sr,
-            treatment,
-            stripRoadExists,
-            nharv,
-            slope,
-            surface
-        )
-
-    } else {
-        const sr_sp = 22;
-        const sr_share_harvest_area = sr_w / sr_sp;
-
-        stripRoadExists = false;
-
-        // const sr_share_tot_area = sr_share_harvest_area; // ser ikke ut til å bli brukt
-        const nharv_sr = stems_ha * sr_share_harvest_area;
-        const v_sr = stripRoadExists? 0:v;
-        const vharv_sr = stems_ha * sr_share_harvest_area * v_sr;
-
-        const vharv_bsr = vharv - vharv_sr;
-        const v_bsr = v * 1.3; // selektivt valg av trær 30% over snitt av v
-        const nharv_bsr = vharv_bsr / v_bsr;
-        const nharv = parseInt((nharv_bsr + nharv_sr).toString());
-        vharv = vharv_sr + vharv_bsr;
-        // const v_hrv = parseFloat((vharv * nharv).toFixed(3));
-
-        console.log({
-            sr_share_harvest_area: sr_share_harvest_area,
-            nharv_sr: nharv_sr,
-            nharv_bsr: nharv_bsr,
-            v_sr: v_sr,
-            vharv_bsr: vharv_bsr,
-            vharv_sr: vharv_sr,
-            v_bsr: v_bsr,
-            vharv: vharv
-        })
-         return getHarvestTime(
-            v_bsr,
-            harvest_strength_pct,
-            vharv,
-            vharv_sr,
-            vharv_bsr,
-            v,
-            v_sr,
-            treatment,
-            stripRoadExists,
-             nharv,
-             slope,
-             surface
-        )
-    }
+    return getHarvestTime(
+        v_bsr,
+        harvest_strength_pct,
+        vharv,
+        vharv_sr,
+        vharv_bsr,
+        v,
+        v_sr,
+        TreatmentType.PATCH_HARVEST,
+        stripRoadExists,
+        nharv,
+        slope,
+        surface
+    )
 }
+
+
+export function selectionHarvestFJ(
+    stems_ha: number = 1200,
+    v: number = 0.4,
+    harvest_strength_pct: number = 45, // share of basal area to be cut
+    patch_size_ha: number = 0.6,
+    sr_w: number = 4,
+    stripRoadExists: boolean,
+    slope: number = 1,
+    surface: number = 1
+) {
+
+    const vharv = stems_ha * v * harvest_strength_pct / 100;
+    const sr_sp = 22;
+    const sr_share_harvest_area = sr_w / sr_sp;
+    const nharv_sr = stems_ha * sr_share_harvest_area;
+    const v_sr = v;
+    const vharv_sr = stems_ha * sr_share_harvest_area * v_sr;
+    const vharv_bsr = vharv - vharv_sr;
+    const v_bsr = v * 1.3; // selektivt valg av trær 30% over snitt av v
+    const nharv_bsr = vharv_bsr / v_bsr;
+    const nharv = nharv_bsr + nharv_sr;
+
+    return getHarvestTime(
+        v_bsr,
+        harvest_strength_pct,
+        vharv,
+        vharv_sr,
+        vharv_bsr,
+        v,
+        v_sr,
+        TreatmentType.SINGLE_TREE_SELECTION,
+        false,
+        nharv,
+        slope,
+        surface
+    )
+
+}
+
 
 function getHarvestTime(
     v_bsr: number,
@@ -154,203 +134,147 @@ function getHarvestTime(
     surface: number
 ) {
     const sf_factor = type===TreatmentType.PATCH_HARVEST? 1 : 2;
-    const newFactor = 1 + (50/nharv) - 0.1 * surface - 0.1 * slope;
-    console.log("sf_factor",sf_factor);
-    const T_proc_cmin_m3 = 81.537 + (29.4662 / v_bsr) + 31.12 * sf_factor;
-    const T_move_cmin_m3 = 5.756 + (539.574 / (v_bsr * harvest_strength_pct * newFactor));
-    const T_clpr_cmin_m3 = 15.84;
-    const T_bsr_cmin_m3 = (T_proc_cmin_m3 + T_move_cmin_m3 + T_clpr_cmin_m3);
-    const T_bsr_cmin_ha = T_bsr_cmin_m3 * vharv_bsr;
-    let T_sr_cmin_m3 = stripRoadExists? 0 : 1;
-    if(type === TreatmentType.PATCH_HARVEST) {
-        T_sr_cmin_m3 *=  stripRoadExists? 0 : 81.537 + (29.4662/v_sr)  + 31.12 * 1.5 + 23.9 / (v_sr * newFactor) + 15.84;
-    } else {
-        T_sr_cmin_m3 *=  stripRoadExists? 0 : 81.537 + (29.4662/v_sr)  + 31.12 * sf_factor + 5.756 + 539.574 / (v_sr * harvest_strength_pct * newFactor) + 15.84;
+    const terrainFactor = 1 + (50/nharv) - 0.1 * surface - 0.1 * slope;
+    let T_cmin_ha = time_bsr_cmin_ha(
+        v_bsr,
+        sf_factor,
+        harvest_strength_pct,
+        terrainFactor,
+        vharv_bsr
+    )
+
+    if(!stripRoadExists) {
+        T_cmin_ha += (type===TreatmentType.PATCH_HARVEST) ?
+            time_sr_patch(v_sr,vharv_sr,terrainFactor)
+            :time_sr_selection(v_sr,vharv_sr,sf_factor,terrainFactor, harvest_strength_pct)
     }
-    const T_sr_cmin_ha = stripRoadExists? 0 : T_sr_cmin_m3 * vharv_sr;
-    const T_cmin_ha = T_sr_cmin_ha + T_bsr_cmin_ha;
-    const T_mean_cmin_m3 = T_cmin_ha/vharv;
 
-
-    const cmin_tree = T_mean_cmin_m3 * v;
     const harv_G15min_ha = T_cmin_ha * 1.5 / 100;
-    const harv_G15h_ha = harv_G15min_ha / 60;
     const harv_G15min_m3 = harv_G15min_ha / vharv;
-    const harv_m3_g15h = 60 / harv_G15min_m3;
+    return 60/harv_G15min_m3;
+}
+
+function time_bsr_cmin_ha(
+    v_bsr: number,
+    sf_factor: number,
+    harvest_strength_pct: number,
+    terrainFactor: number,
+    vharv_bsr: number
+) {
+    return vharv_bsr * (
+        time_proc_cmin_m3(v_bsr, sf_factor)
+        + time_move_cmin_m3(v_bsr,harvest_strength_pct,terrainFactor)
+        + time_clpr_cmin_m3()
+    );
+}
+
+function time_sr_patch(
+    v_sr: number,
+    vharv:number,
+    terrainFactor: number
+){
     console.log({
-        T_proc_cmin_m3: T_proc_cmin_m3,
-        T_move_cmin_m3: T_move_cmin_m3,
-        T_clpr_cmin_m3: T_clpr_cmin_m3,
-        T_bsr_cmin_m3: T_bsr_cmin_m3,
-        T_bsr_cmin_ha: T_bsr_cmin_ha,
-        T_sr_cmin_m3: T_sr_cmin_m3,
-        T_sr_cmin_ha: T_sr_cmin_ha,
-        T_cmin_ha: T_cmin_ha,
-        T_mean_cmin_m3: T_mean_cmin_m3,
-        cmin_tree: cmin_tree,
-        harv_G15min_ha: harv_G15min_ha,
-        harv_G15h_ha: harv_G15h_ha,
-        harv_G15min_m3: harv_G15min_m3,
-        harv_m3_g15h: harv_m3_g15h
-    });
-    return harv_m3_g15h;
+        v_sr: v_sr,
+        vharv: vharv,
+        terrainFactor: terrainFactor
+    })
+
+    const result = vharv * (81.537 + (29.4662/v_sr)  + 31.12 * 1.5 + 23.9 / (v_sr * terrainFactor) + 15.84);
+    console.log(result);
+    return result;
 }
 
-
-export function patchHarvest(
-    stemsPerHectare: number = 1200,
-    meanTreeVolumeM3fub: number = 0.4, // m^3fub = mean tree volume excluding bark. Tror dette er middelstamme eller en variant av det.
-    harvestStrengthPercent: number = 45, // share of basal area to be cut
-    harvestedPatchSizeInHectare: number = 0.6,
-    stripRoadWidthMeters: number = 4,
-    stripRoadExists: boolean = true
-) {
-
-    let volumeHarvestedPerHectare = stemsPerHectare * meanTreeVolumeM3fub * (harvestStrengthPercent / 100);
-
-    console.log(volumeHarvestedPerHectare);
-    harvestedPatchSizeInHectare = trunk_rng(harvestedPatchSizeInHectare, 100/10000, 0.5);
-    const patchEdgeLengthInMeters = Math.sqrt(harvestedPatchSizeInHectare) * 100;
-
-    console.log(harvestedPatchSizeInHectare);
-
-    console.log(patchEdgeLengthInMeters);
-
-    const a = stripRoadWidthMeters^2;
-    console.log("a", a);
-    const b = 4 * stripRoadWidthMeters * (harvestStrengthPercent/100) * patchEdgeLengthInMeters;
-    console.log("b", b);
-
-
-    const c = 4 * (harvestStrengthPercent/100) * patchEdgeLengthInMeters^2;
-    console.log("c", c);
-    const stripRoadSpacing =
-        (Math.sqrt( a - b + c) + stripRoadWidthMeters) /
-        (2 * (harvestStrengthPercent/100))
-
-    console.log(stripRoadSpacing);
-
-    const stripRoadAreaFractionPerPatch =
-        (stripRoadSpacing * patchEdgeLengthInMeters) *
-        stripRoadWidthMeters / (harvestStrengthPercent * stripRoadSpacing**2 /100);
-
-    console.log(stripRoadAreaFractionPerPatch);
-
-    const stripRoadStemCount =
-        stripRoadExists? 0 : stripRoadAreaFractionPerPatch * stemsPerHectare;
-
-    console.log(stripRoadStemCount);
-
-    const volumeHarvestedPerHectareOnStripRoad = stripRoadStemCount * meanTreeVolumeM3fub;
-
-    console.log(volumeHarvestedPerHectareOnStripRoad);
-
-    const v_sr =
-        stripRoadExists? 0 : volumeHarvestedPerHectareOnStripRoad / stripRoadStemCount;
-
-    console.log(v_sr);
-
-    const volumeHarvestedPrHectareBetweenStripRoads =
-        volumeHarvestedPerHectare - volumeHarvestedPerHectareOnStripRoad;
-
-    return getHarvestTimePerG15H(
-        meanTreeVolumeM3fub,
-        harvestStrengthPercent,
-        volumeHarvestedPerHectare,
-        volumeHarvestedPerHectareOnStripRoad,
-        volumeHarvestedPrHectareBetweenStripRoads,
-        meanTreeVolumeM3fub,
-        v_sr,
-        TreatmentType.PATCH_HARVEST,
-        stripRoadExists
-    )
+function time_sr_selection(
+    v_sr: number,
+    vharv: number,
+    sf_factor: number,
+    terrainFactor: number,
+    harvest_strength_pct: number
+){
+    return vharv * (81.537 + (29.4662/v_sr)  + 31.12 * sf_factor + 5.756 + 539.574 / (v_sr * harvest_strength_pct * terrainFactor) + 15.84);
 }
 
-
-
-
-
-export function selectionHarvest(
-    stemsPerHectare: number = 1200,
-    meanTreeVolumeM3fub: number = 0.4, // m^3fub = mean tree volume excluding bark. Tror dette er middelstamme eller en variant av det.
-    harvestStrengthPercent: number = 45, // share of basal area to be cut
-    harvestedPatchSizeInHectare: number = 0.6,
-    stripRoadWidthMeters: number = 4,
-    stripRoadExists: boolean = true
+function time_proc_cmin_m3(
+    v_bsr: number,
+    sf_factor: number
 ) {
-    let volumeHarvestedPerHectare = stemsPerHectare * meanTreeVolumeM3fub * harvestStrengthPercent / 100;
-    const stripRoadSpacing = 22;
-    const sr_share_harvest_area = stripRoadWidthMeters / stripRoadSpacing;
-
-    stripRoadExists = false;
-
-    const volumeStripRoad = meanTreeVolumeM3fub;
-    const volumeHarvestedPerHectareOnStripRoad = stemsPerHectare * sr_share_harvest_area * volumeStripRoad;
-    const volumeHarvestedPerHectareBetweenStripRoads = volumeHarvestedPerHectare - volumeHarvestedPerHectareOnStripRoad;
-    const volumeBetweenStripRoads = meanTreeVolumeM3fub * 1.3;
-    volumeHarvestedPerHectare = volumeHarvestedPerHectareOnStripRoad * volumeHarvestedPerHectareBetweenStripRoads;
-
-    return getHarvestTimePerG15H(
-        volumeBetweenStripRoads,
-        harvestStrengthPercent,
-        volumeHarvestedPerHectare,
-        volumeHarvestedPerHectareOnStripRoad,
-        volumeHarvestedPerHectareBetweenStripRoads,
-        meanTreeVolumeM3fub,
-        volumeStripRoad,
-        TreatmentType.SINGLE_TREE_SELECTION,
-        stripRoadExists
-    )
+    return 81.537 + (29.4662 / v_bsr) + 31.12 * sf_factor;
 }
 
-
-export function getHarvestTimePerG15H(
-    volumeBetweenStripRoads: number,
-    harvestStrengthPercentage: number,
-    volumeHarvestedPrHectare: number,
-    volumeHarvestedPrHectareOnStripRoad: number,
-    volumeHarvestedPrHectareBetweenStripRoads: number,
-    meanTreeVolumem3fub: number,
-    stripRoadVolume: number,
-    type: TreatmentType,
-    stripRoadAlreadyExists: boolean
+function time_move_cmin_m3(
+    v_bsr: number,
+    harvest_strength_pct: number,
+    terrainFactor: number
 ) {
-    let centiMinSpentPrHectare = centiMinSpentPrHectareBetweenStripRoad(
-        volumeBetweenStripRoads,
-        type,
-        harvestStrengthPercentage,
-        volumeHarvestedPrHectareBetweenStripRoads
-    )
-    if(!stripRoadAlreadyExists) {
-        centiMinSpentPrHectare += centiMinSpentPrHectareOnStripRoads(
-            stripRoadVolume,
-            volumeHarvestedPrHectareOnStripRoad
-        );
+    // console.log({
+    //     v_bsr: v_bsr,
+    //     harvest_strength_pct: harvest_strength_pct,
+    //     terrain: terrainFactor
+    // })
+    const result = 5.756 + (539.574 / (v_bsr * harvest_strength_pct * terrainFactor));
+    // console.log(result)
+    return result;
+}
+
+function time_clpr_cmin_m3() {
+    return 15.84
+}
+
+export function t_forw_bb(
+    forw_size: "large" | "medium" | "small",
+    modelversion: "Talbot16" | "Brunberg04",
+    treatment: "clearcutting" | "thinning",
+    harvest_strength_pct: number = 100,
+    surface: number = 2,
+    slope: number = 2,
+    v: number = 0.25,
+    Stems_ha: number,
+    distance_basveg: number,
+    distance_forest: number,
+    nbAssortments: number,
+
+) {
+    const Vharv = Stems_ha * v * harvest_strength_pct / 100;
+    // const Nharv = Vharv / v;
+
+    // t4 calculation
+    const a = treatment === "thinning" ? -43 : 5.7;
+    const b = treatment === "thinning" ? 25.9 : 11.45;
+    const K1 = modelversion === "Talbot16" ? 1.4 : 1;
+    let K2;
+    if (treatment === "clearcutting") {
+        K2 = forw_size === "small" ? 1.04 : forw_size === "medium" ? 0.86 : 0.73;
+    } else {
+        K2 = forw_size === "small" ? 1.18 : 0.67;
     }
+    const Vharv2 = treatment === "thinning"
+        ? trunk_rng(Vharv, 25, 125)
+        : trunk_rng(Vharv, 50, 350);
+    const t4 = K1 * ((a + K2 * Vharv2 + b * Math.sqrt(Vharv2)) / Vharv2);
 
-    const g15MinPrHectare = centiMinSpentPrHectare * 1.5 / 100;
-    const volumeHarvestedPrG15min = g15MinPrHectare / volumeHarvestedPrHectare;
-    return 60 / volumeHarvestedPrG15min;
-}
+    // t5 calculation
+    let speed = 75 - (8.2 * surface) - (1.4 * Math.pow(slope, 2));
+    speed = treatment === "clearcutting" ? speed : 0.85 * speed;
+    const c_cap = forw_size === "small" ? 9.5 : forw_size === "medium" ? 13.6 : 17.9;
+    const t5 = ((2 * distance_forest / speed + (2 * distance_basveg / 100)) / c_cap);
 
+    // t6 calculation
+    const vtr = trunk_rng(v, 0, 0.5);
+    const t6 = 0.05 - vtr;
 
-export function centiMinSpentPrHectareBetweenStripRoad(
-    volumeBetweenStripRoads: number,
-    type: TreatmentType,
-    harvestStrengthPercentage: number,
-    volumeHarvestedPrHectareBetweenStripRoads: number,
-) {
-    const timeProcessingInCentiMinPrM3 = 81.537 / (29.4662 / volumeBetweenStripRoads) + 31.12 * ((type === TreatmentType.PATCH_HARVEST)? 1 : 2);
-    const timeMovingInCentiMinPrM3 = 5.756 + (539.574 / (volumeBetweenStripRoads * harvestStrengthPercentage));
-    const timeSpentClearingAndPreparingInCentiMinPrM3 = 15.84;
-    const centiMinPrM3BetweenStripRoads = (timeProcessingInCentiMinPrM3 + timeMovingInCentiMinPrM3 + timeSpentClearingAndPreparingInCentiMinPrM3);
-    return centiMinPrM3BetweenStripRoads * volumeHarvestedPrHectareBetweenStripRoads;
-}
+    // t7 calculation
+    const t7 = -0.1 + 0.1 * nbAssortments;
 
-export function centiMinSpentPrHectareOnStripRoads(
-    stripRoadVolume: number,
-    volumeHarvestedPrHectareOnStripRoad: number
-) {
-    const centiMinSpentPrM3OnStripRoads = 81.537 + (29.4662/stripRoadVolume)  + 31.12 * 1.5 + 23.9 / stripRoadVolume + 15.84;
-    return centiMinSpentPrM3OnStripRoads * volumeHarvestedPrHectareOnStripRoad;
+    // t8 calculation
+    const nbLoads = Math.floor((Vharv / c_cap) + 0.99);
+    const t8 = 1.5 * nbLoads;
+
+    // Final calculations
+    const t4t7 = t4 + t5 + t6 + t7;
+    const forw_G15min_ha = t4t7 * Vharv + t8;
+    // const forw_G15min_m3 = Math.round(forw_G15min_ha / Vharv * 10) / 10;
+    // const forw_G15h_ha = Math.round((forw_G15min_ha / 60) * 100) / 100;
+    const forw_m3_G15h = Math.round(60 / (forw_G15min_ha / Vharv) * 100) / 100;
+
+    return forw_m3_G15h;
 }
