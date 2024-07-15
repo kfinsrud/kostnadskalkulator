@@ -53,7 +53,8 @@ describe('flattenGraph', ()=>{
 
         const resolvedConnections = resolveIncomingModuleConnections(
             moduleNode,
-            editor.getConnections()
+            editor.getConnections(),
+            []
         );
         // Checks that the connection going into the module has been redirected directly to outputNode
         // numberNode -> Module( ModuleInput -> ModuleOutput ) -> outputNode
@@ -71,7 +72,8 @@ describe('flattenGraph', ()=>{
 
         const resolvedConnections = resolveIncomingModuleConnections(
             moduleNode,
-            editor.getConnections()
+            editor.getConnections(),
+            []
         );
         // Checks that the connection going into the module has been discarded
         // numberNode -> Module( ModuleInput -/> ModuleOutput ) -> outputNode
@@ -81,7 +83,7 @@ describe('flattenGraph', ()=>{
     })
 
     it('Should handle multiple connections from a moduleInput to multiple nodes', async ()=>{
-        const { factory, editor, engine, outputID, moduleNode } = await createTestContext(ModuleName.singleInputMultipleTargets);
+        const { editor, engine, outputID, moduleNode } = await createTestContext(ModuleName.singleInputMultipleTargets);
         const result = await engine.fetch(outputID);
         // Checks that the value has successfully passed through the module to outputNode and has been doubled
         // by the Add node.
@@ -89,7 +91,8 @@ describe('flattenGraph', ()=>{
 
         const resolvedConnections = resolveIncomingModuleConnections(
             moduleNode,
-            editor.getConnections()
+            editor.getConnections(),
+            []
         );
         // Checks that the connection going into the module has been redirected to both addNodes
         // numberNode -> Module( ModuleInput -> 2x AddNode -> ModuleOutput ) -> outputNode
