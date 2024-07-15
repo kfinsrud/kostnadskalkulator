@@ -206,14 +206,7 @@ function time_move_cmin_m3(
     harvest_strength_pct: number,
     terrainFactor: number
 ) {
-    // console.log({
-    //     v_bsr: v_bsr,
-    //     harvest_strength_pct: harvest_strength_pct,
-    //     terrain: terrainFactor
-    // })
-    const result = 5.756 + (539.574 / (v_bsr * harvest_strength_pct * terrainFactor));
-    // console.log(result)
-    return result;
+    return 5.756 + (539.574 / (v_bsr * harvest_strength_pct * terrainFactor));
 }
 
 function time_clpr_cmin_m3() {
@@ -274,7 +267,5 @@ export function t_forw_bb(
     const forw_G15min_ha = t4t7 * Vharv + t8;
     // const forw_G15min_m3 = Math.round(forw_G15min_ha / Vharv * 10) / 10;
     // const forw_G15h_ha = Math.round((forw_G15min_ha / 60) * 100) / 100;
-    const forw_m3_G15h = Math.round(60 / (forw_G15min_ha / Vharv) * 100) / 100;
-
-    return forw_m3_G15h;
+    return Math.round(60 / (forw_G15min_ha / Vharv) * 100) / 100;
 }
