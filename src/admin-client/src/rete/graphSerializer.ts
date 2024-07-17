@@ -6,6 +6,7 @@ import {BinaryNode} from "./nodes/mathNodes/binaryNode";
 import {NodeFactory} from "./nodeFactory";
 import {NodeType} from "@skogkalk/common/dist/src/parseTree";
 import {ChooseNode} from "./nodes/controlNodes/chooseNode";
+import {ModuleNode} from "./nodes/moduleNodes/moduleNode";
 
 export interface SerializedNode {
     id: string;
@@ -70,6 +71,9 @@ export class GraphSerializer {
                 await this.editor.addNode(node);
                 if(this.area) {
                     await this.area.translate(node.id, { x: node.xTranslation, y: node.yTranslation });
+                }
+                if(node.type === NodeType.Module) {
+                    await (node as ModuleNode).setModuleAndRefreshPorts()
                 }
             }
 
