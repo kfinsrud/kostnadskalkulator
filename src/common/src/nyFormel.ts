@@ -33,7 +33,6 @@ function sr_sp_patch(
     return result;
 }
 
-
 export function patchHarvestFJ(
     stems_ha: number = 1200,
     v: number = 0.4,
@@ -54,6 +53,7 @@ export function patchHarvestFJ(
     )
 
     const sr_share_harvest_area = (sr_sp - ptch_w) * sr_w / (harvest_strength_pct * sr_sp*sr_sp /100);
+    console.log("sr share", sr_share_harvest_area);
     const nharv_sr = stripRoadExists? 0 : sr_share_harvest_area * stems_ha;
     const vharv_sr = nharv_sr * v;
     const v_sr = stripRoadExists? 0 : vharv_sr / nharv_sr;
@@ -85,16 +85,17 @@ export function selectionHarvestFJ(
     harvest_strength_pct: number = 45, // share of basal area to be cut
     patch_size_ha: number = 0.6,
     sr_w: number = 4,
-    stripRoadExists: boolean,
+    stripRoadExists: boolean = false,
     slope: number = 1,
     surface: number = 1
 ) {
-
     const vharv = stems_ha * v * harvest_strength_pct / 100;
     const sr_sp = 22;
+    // stripRoadExists = false;
+
     const sr_share_harvest_area = sr_w / sr_sp;
-    const nharv_sr = stems_ha * sr_share_harvest_area;
-    const v_sr = v;
+    const nharv_sr = stripRoadExists? 0 : stems_ha * sr_share_harvest_area;
+    const v_sr = stripRoadExists? 0 : v;
     const vharv_sr = stems_ha * sr_share_harvest_area * v_sr;
     const vharv_bsr = vharv - vharv_sr;
     const v_bsr = v * 1.3; // selektivt valg av trær 30% over snitt av v
@@ -110,12 +111,11 @@ export function selectionHarvestFJ(
         v,
         v_sr,
         TreatmentType.SINGLE_TREE_SELECTION,
-        false,
+        stripRoadExists,
         nharv,
         slope,
         surface
     )
-
 }
 
 
@@ -173,15 +173,8 @@ function time_sr_patch(
     vharv:number,
     terrainFactor: number
 ){
-    console.log({
-        v_sr: v_sr,
-        vharv: vharv,
-        terrainFactor: terrainFactor
-    })
 
-    const result = vharv * (81.537 + (29.4662/v_sr)  + 31.12 * 1.5 + 23.9 / (v_sr * terrainFactor) + 15.84);
-    console.log(result);
-    return result;
+    return vharv * (81.537 + (29.4662/v_sr)  + 31.12 * 1.5 + 23.9 / (v_sr * terrainFactor) + 15.84);
 }
 
 function time_sr_selection(
@@ -265,7 +258,107 @@ export function t_forw_bb(
     // Final calculations
     const t4t7 = t4 + t5 + t6 + t7;
     const forw_G15min_ha = t4t7 * Vharv + t8;
+    console.log({
+        vharv_trunc: Vharv2,
+        t4:t4,
+        t5:t5,
+        t6:t6,
+        t7:t7,
+        t4t7:t4t7,
+        t8:t8,
+        res: 60/(forw_G15min_ha/Vharv),
+        k2: K2,
+        k1:K1,
+        a:a,
+        b:b,
+        ccap:c_cap,
+        speed:speed,
+        f:2 * distance_forest / speed
+    })
     // const forw_G15min_m3 = Math.round(forw_G15min_ha / Vharv * 10) / 10;
     // const forw_G15h_ha = Math.round((forw_G15min_ha / 60) * 100) / 100;
+
     return Math.round(60 / (forw_G15min_ha / Vharv) * 100) / 100;
+}
+
+
+export function t_harv_thinning_bb(
+    Stems_ha = 1200,
+    v = 0.4,
+    harvest_strength_pct = 30,
+    p_init_spruce = 0.95,
+    L = 2,
+    Y = 2,
+    modelversion = "Brunberg97",
+    Pharv_broadLeaves = 0,
+    thinningsystem = "striproad",
+    thinningnumber = 1,
+    rd = 0.9,
+    sr_sp = 20,
+    sr_w = 4
+) {
+    // Helper function
+    const trunkRng = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+    // Calculations
+    const Nharv = Stems_ha * harvest_strength_pct / 100 / rd;
+    const W = sr_sp - sr_w;
+
+    const Nres = Stems_ha - Nharv;
+    const V_init = Stems_ha * v;
+    const Vharv = V_init * harvest_strength_pct / 100;
+    const v_hrv = v * rd * Math.sqrt(rd);
+    const v_tr = trunkRng(v_hrv, 0, 3);
+    L = trunkRng(L, 1, 4);
+    Y = trunkRng(Y, 1, 4);
+    p_init_spruce = trunkRng(p_init_spruce, 0, 1);
+
+    // t1 calculation
+    const Nharv_tr = trunkRng(Nharv, 400, 2000);
+    let K = 0;
+    switch(thinningsystem) {
+        case "striproad_with_midfield_machine": K = 15.4; break;
+        case "striproad_with_midfield_chainsaw": K = 20.2; break;
+        default: K = 15.6;
+    }
+    const S = (
+        thinningsystem === "striproad_with_midfield_machine" || thinningsystem === "striproad_with_midfield_chainsaw" ?
+            2 * W / 3 : W
+    );
+    const t1 = trunkRng(1000000 / (S * Nharv_tr * K * (1 + (50/Nharv_tr) - 0.1*Y - 0.1*L)), 2, 20);
+
+    // t2 calculation
+    const phindrance = 0.35 / (1 + Math.exp(2.5*(1.9 - v_tr)));
+    const pdoublesawed = 1 / (1 + Math.exp(3.5*(1.6 - v_tr)));
+    const pdifficult = 0.7 / (1 + Math.exp(4.4 - (2 * v_tr)));
+    const p = thinningnumber === 1 && v_tr <= 0.2 ? p_init_spruce :
+        thinningnumber === 2 && v_tr <= 0.2 ? 0.5 * p_init_spruce : 0;
+
+    const cc_intc = modelversion === "Talbot16" ? 21.3 : modelversion === "Brunberg07" ? 24 : 27.3;
+    const cc_slp = modelversion === "Talbot16" ? 157.92 : modelversion === "Brunberg07" ? 35 : 56;
+
+    const t21 =  v_tr <= 0.2 ?
+        (v_tr * (78 * p + 89) + Nres * (0.0025 * p + 0.0019) + 20.3) + 2.3 * Pharv_broadLeaves :
+        (cc_intc + cc_slp*v_tr + 28*pdoublesawed + 15*phindrance + 37*pdifficult);
+
+    const thinningtypecorr = v_tr <= 0.2 && rd > 0.95 && rd <= 1 ? -1.3 :
+        v_tr <= 0.2 && rd > 1 ? -16*(Math.min(rd, 1.1) - 1) : 0;
+
+    const thinningsyscorr =  v_tr <= 0.2 && thinningsystem === "striproad_with_midfield_machine" ? 3.4 * 0.3 :
+         v_tr <= 0.2 && thinningsystem === "striproad_with_midfield_chainsaw" ? 8.3 * 0.17 : 0;
+
+    const t2 = t21 + thinningtypecorr + thinningsyscorr;
+
+    // t3 calculation
+    const t3 = 4.3;
+
+    // Final calculations
+    const ttot_cmin_tree = t1 + t2 + t3;
+    const harv_G15min_tree = ttot_cmin_tree * 1.3 / 100;
+    const harv_G15min_ha = harv_G15min_tree * Nharv;
+    const harv_G15min_m3 = harv_G15min_ha / Vharv;
+    const harv_m3_G15h = 60 / harv_G15min_m3;
+
+    // Return only harv_m3_G15h
+    return Number(harv_m3_G15h.toFixed(3));
 }
