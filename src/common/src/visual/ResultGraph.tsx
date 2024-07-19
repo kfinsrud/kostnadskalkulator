@@ -58,7 +58,7 @@ export function ResultGraph(
         const output = getNodeByID(props.treeState, entry.outputID);
         return {
             name: (output as OutputNode).name,
-            data: entry.values,
+            data: entry.values.map(v=>(Number.isNaN(v)?null:v)),
             color: (output as OutputNode).color
         }
     }) || [];
