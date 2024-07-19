@@ -315,7 +315,7 @@ export function t_harv_thinning_bb(
 
     // t1 calculation
     const Nharv_tr = trunkRng(Nharv, 400, 2000);
-    let K = 0;
+    let K;
     switch(thinningsystem) {
         case "striproad_with_midfield_machine": K = 15.4; break;
         case "striproad_with_midfield_chainsaw": K = 20.2; break;
