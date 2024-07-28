@@ -1,5 +1,14 @@
 import {NodeType} from "../nodes/parseNode";
 
+export function getUnaryOperation(type: NodeType) : (input: number) => number {
+    switch(type) {
+        case NodeType.Exp: return Math.exp;
+        case NodeType.Ceil: return Math.ceil;
+        case NodeType.Floor: return Math.floor;
+        case NodeType.Round: return Math.round;
+        default: throw new Error("Invalid node type");
+    }
+}
 
 export function getBinaryOperation(type: NodeType): (l:number, r:number) => number {
     switch(type) {
