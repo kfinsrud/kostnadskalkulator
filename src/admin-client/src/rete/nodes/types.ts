@@ -14,10 +14,11 @@ import {DisplayPreviewNode} from "./displayNodes/displayPreviewNode/displayPrevi
 import {DisplayListNode} from "./displayNodes/displayListNode/displayListNode";
 import {ChooseNode} from "./controlNodes/chooseNode";
 import {GraphDisplayNode} from "./displayNodes/graphDisplayNode/graphDisplayNode";
+import {UnaryNode} from "./mathNodes/unaryNode";
 
 export type ReteNode = ParseableNode | ModuleInput | ModuleOutput | ModuleNode;
 
-export type ParseableNode = NumberNode | BinaryNode | NaryNode | NumberInputNode | OutputNode | DropdownInputNode | DisplayPieNode | DisplayBarNode | ChooseNode | DisplayPreviewNode | DisplayListNode | GraphDisplayNode;
+export type ParseableNode = UnaryNode | NumberNode | BinaryNode | NaryNode | NumberInputNode | OutputNode | DropdownInputNode | DisplayPieNode | DisplayBarNode | ChooseNode | DisplayPreviewNode | DisplayListNode | GraphDisplayNode;
 
 
 export type NumberNodeOutput = { value: number, sourceID: string };
