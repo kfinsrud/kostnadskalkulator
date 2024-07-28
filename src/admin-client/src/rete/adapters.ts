@@ -12,6 +12,7 @@ import {ChooseNode} from "./nodes/controlNodes/chooseNode";
 
 interface NodeConnection {
     id: string
+    unaryInput?: string
     left?: string
     right?: string
     child?: string
@@ -280,6 +281,8 @@ export async function createParseNodeGraph(serializer: GraphSerializer, moduleMa
                 parentNode.left = connection.source;
             } else if(targetPortName === "right") {
                 parentNode.right = connection.source;
+            } else if(targetPortName === "unaryInput") {
+                parentNode.unaryInput = connection.source;
             } else {
                 if(parentNode.inputs !== undefined) {
                     parentNode.inputs.push(connection.source)
@@ -353,6 +356,11 @@ function populateTree(startNode: NodeConnection, nodeConnections: Map<string, No
         }
 
         const currentConnection = nodeConnections.get(currentNode.id);
+
+        if (currentConnection?.unaryInput) {
+            const inputNode = currentNode.input = parseNodeFromID(currentConnection.unaryInput);
+            stack.push(inputNode);
+        }
 
         if (currentConnection?.left) {
             const leftNode = currentNode.left = parseNodeFromID(currentConnection.left);
