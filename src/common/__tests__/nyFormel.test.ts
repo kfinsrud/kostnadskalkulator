@@ -1,4 +1,4 @@
-import {patchHarvestFJ, selectionHarvestFJ, t_forw_bb} from "../src/nyFormel";
+import {patchHarvestFJ, selectionHarvestFJ, t_forw_bb, t_harv_thinning_bb} from "../src/nyFormel";
 
 
 test('Lukket hogst1', ()=>{
@@ -133,4 +133,49 @@ test('forwarder', ()=>{
     expect(result).toEqual(11.41);
 })
 
+test('thinning', ()=>{
+    const result = t_harv_thinning_bb();
+    console.log(result);
+    expect(result).toEqual(25.329)
+})
 
+
+test('thinning', ()=>{
+    const result = t_harv_thinning_bb(
+        800,
+        0.25,
+        45,
+        0.8,
+        1,
+        1,
+        "Brunberg97",
+        0,
+        "striproad_with_midfield_chainsaw",
+        1,
+        0.8,
+        20,
+        4
+    );
+    console.log(result);
+    expect(result).toEqual(14.033)
+})
+
+test('thinning', ()=>{
+    const result = t_harv_thinning_bb(
+        800,
+        0.25,
+        45,
+        0.8,
+        1,
+        1,
+        "Brunberg97",
+        0,
+        "striproad_with_midfield_machine",
+        1,
+        0.8,
+        20,
+        4
+    );
+    console.log(result);
+    expect(result).toEqual(13.394)
+})
