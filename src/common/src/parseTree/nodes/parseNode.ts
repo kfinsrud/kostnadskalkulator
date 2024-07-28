@@ -8,6 +8,7 @@ export type ParseNode = {
     id: string
     type: NodeType
     value: number
+    input?: ParseNode
     left?: ParseNode | ReferenceNode
     right?: ParseNode | ReferenceNode
     child?: ParseNode | ReferenceNode
@@ -46,6 +47,15 @@ export function isNaryNode(node: ParseNode) : boolean {
     ].includes(node.type);
 }
 
+export function isUnaryNode(node: ParseNode) : boolean {
+    return [
+        NodeType.Exp,
+        NodeType.Floor,
+        NodeType.Ceil,
+        NodeType.Round
+    ].includes(node.type);
+}
+
 export enum NodeType {
     Reference = "Reference",
     Root = "Root",
@@ -71,5 +81,9 @@ export enum NodeType {
     Choose = "Choose",
     Module = "Module",
     ModuleOutput = "ModuleOutput",
-    ModuleInput = "ModuleInput"
+    ModuleInput = "ModuleInput",
+    Exp = "Exp",
+    Ceil = "Ceil",
+    Floor = "Floor",
+    Round = "Round"
 }
