@@ -561,7 +561,11 @@ export class Editor {
             NodeType.Choose,
             NodeType.Min,
             NodeType.Max,
-            NodeType.Sqrt
+            NodeType.Sqrt,
+            NodeType.Exp,
+            NodeType.Round,
+            NodeType.Ceil,
+            NodeType.Floor
         ])
         const inputNodes = nodeTypesToDefinition ([
             NodeType.DropdownInput,
