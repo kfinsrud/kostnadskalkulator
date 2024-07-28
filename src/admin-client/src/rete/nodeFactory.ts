@@ -16,6 +16,7 @@ import {DisplayPreviewNode} from "./nodes/displayNodes/displayPreviewNode/displa
 import {DisplayListNode} from "./nodes/displayNodes/displayListNode/displayListNode";
 import {GraphDisplayNode} from "./nodes/displayNodes/graphDisplayNode/graphDisplayNode";
 import {NodeAction} from "./nodeActions";
+import {UnaryNode} from "./nodes/mathNodes/unaryNode";
 
 
 export class NodeFactory {
@@ -49,6 +50,10 @@ export class NodeFactory {
             case NodeType.Min: return new NaryNode(NodeType.Min, this.dispatch, id);
             case NodeType.Max: return new NaryNode(NodeType.Max, this.dispatch, id);
             case NodeType.Choose: return new ChooseNode(this.dispatch,id);
+            case NodeType.Exp: return new UnaryNode(NodeType.Exp, this.dispatch, id);
+            case NodeType.Ceil: return new UnaryNode(NodeType.Ceil, this.dispatch, id);
+            case NodeType.Floor: return new UnaryNode(NodeType.Floor, this.dispatch, id);
+            case NodeType.Round: return new UnaryNode(NodeType.Round, this.dispatch, id);
         }
         throw new Error("NodeFactory.createNode() was invoked with " + type + " which has no implementation in createNode().");
     }
