@@ -163,7 +163,20 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
                     <Container>
                         <Row>
                             <Col className="title" data-testid={"title"}>{label}</Col>
-                            {show &&
+                            <Col>
+                                <Drag.NoDrag>
+                                    <Button
+                                        onClick={()=>{
+                                            setShow(!show);
+                                        }}
+                                    >
+                                        <MdLabel></MdLabel>
+                                    </Button>
+                                </Drag.NoDrag>
+                            </Col>
+                        </Row>
+                        {
+                            show && <Row>
                                 <Col>
                                     <Form.Floating
                                         style={{color: '#6f7174', width: "100%", minWidth:"100px"}}
@@ -178,33 +191,23 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
                                             size={"sm"}
                                             className={"field"}
                                             type={"text"}
-                                            value={labelOverride}
+                                            value={manualLabel}
                                             inputMode={"text"}
                                             onChange={handleLabelChange}
                                         />
                                         <Form.Label>label</Form.Label>
                                     </Form.Floating>
                                 </Col>
-                            }
-                            {labelOverride && !show &&
+                            </Row>
+                        }
+                        {labelOverride && !show &&
+                            <Row>
                                 <Col className="title">
                                     {labelOverride}
                                 </Col>
-                            }
-                            <Col>
-                                <Drag.NoDrag>
-                                    <Button
-                                        onClick={()=>{
-                                            setShow(!show);
-                                        }}
-                                    >
-                                        <MdLabel></MdLabel>
-                                    </Button>
-                                </Drag.NoDrag>
-                            </Col>
-                        </Row>
+                            </Row>
+                        }
                     </Container>
-
                 {/* Outputs */}
                 {outputs.map(
                     ([key, output]) =>
