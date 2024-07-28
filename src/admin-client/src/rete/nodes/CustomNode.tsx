@@ -1,11 +1,16 @@
 import * as React from "react";
-import {ClassicScheme, Presets, RenderEmit} from "rete-react-plugin";
+import {useState} from "react";
+import {ClassicScheme, Drag, Presets, RenderEmit} from "rete-react-plugin";
 import styled, {css} from "styled-components";
 import {$nodeWidth, $socketMargin, $socketSize} from "./styleDefaults";
+import Button from "react-bootstrap/Button";
+import {MdLabel} from "react-icons/md";
+import Container from "react-bootstrap/Container";
+import {Col, Form, Row} from "react-bootstrap";
 
 const { RefSocket, RefControl } = Presets.classic;
 const nodeBackgroundColor = "#777777"
-type NodeExtraData = { width?: number; height?: number };
+type NodeExtraData = { width?: number; height?: number; labelOverride?: string };
 
 export const NodeStyles = styled.div<
     NodeExtraData & { selected: boolean; styles?: (props: any) => any }
@@ -129,11 +134,18 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
     const outputs = Object.entries(props.data.outputs);
     const controls = Object.entries(props.data.controls);
     const selected = props.data.selected || false;
-    const { id, label, width, height } = props.data;
+    const { id, label, width, height, labelOverride } = props.data;
+    const [show, setShow] = useState(false);
+    const [manualLabel, setLabel] = useState(labelOverride);
 
     sortByIndex(inputs);
     sortByIndex(outputs);
     sortByIndex(controls);
+
+    const handleLabelChange = (e: any)=>{
+        props.data.labelOverride = e.currentTarget.value;
+        setLabel(e.currentTarget.value);
+    }
 
     return (
         <>
@@ -148,12 +160,51 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
                 styles={props.styles}
                 data-testid="node"
             >
-                <div
-                    className="title"
-                    data-testid="title"
-                >
-                    {label}
-                </div>
+                    <Container>
+                        <Row>
+                            <Col className="title" data-testid={"title"}>{label}</Col>
+                            {show &&
+                                <Col>
+                                    <Form.Floating
+                                        style={{color: '#6f7174', width: "100%", minWidth:"100px"}}
+                                        onPointerDown={(e)=>{e.stopPropagation()}}
+                                        onDoubleClick={e=>{e.stopPropagation()}}
+                                    >
+                                        <Form.Control
+                                            onSubmit={(e)=>{
+                                                e.preventDefault();
+                                                setShow(false);
+                                            }}
+                                            size={"sm"}
+                                            className={"field"}
+                                            type={"text"}
+                                            value={labelOverride}
+                                            inputMode={"text"}
+                                            onChange={handleLabelChange}
+                                        />
+                                        <Form.Label>label</Form.Label>
+                                    </Form.Floating>
+                                </Col>
+                            }
+                            {labelOverride && !show &&
+                                <Col className="title">
+                                    {labelOverride}
+                                </Col>
+                            }
+                            <Col>
+                                <Drag.NoDrag>
+                                    <Button
+                                        onClick={()=>{
+                                            setShow(!show);
+                                        }}
+                                    >
+                                        <MdLabel></MdLabel>
+                                    </Button>
+                                </Drag.NoDrag>
+                            </Col>
+                        </Row>
+                    </Container>
+
                 {/* Outputs */}
                 {outputs.map(
                     ([key, output]) =>

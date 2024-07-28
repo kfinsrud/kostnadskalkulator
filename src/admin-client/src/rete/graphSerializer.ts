@@ -9,6 +9,7 @@ import {ChooseNode} from "./nodes/controlNodes/chooseNode";
 import {ModuleNode} from "./nodes/moduleNodes/moduleNode";
 
 export interface SerializedNode {
+    labelOverride?: string,
     id: string;
     label: string;
     xy: [number, number];
@@ -53,13 +54,14 @@ export class GraphSerializer {
 
             const oldToNewIDMapping = new Map<string, string>();
 
-            for (const { id, controls, type, xy , connections} of deepDataCopy.nodes) {
+            for (const { id, controls, type, xy , connections, labelOverride} of deepDataCopy.nodes) {
 
                 let node = this.factory.createNode(type, id);
 
                 node.deserializeControls(controls);
                 node.xTranslation = xy[0];
                 node.yTranslation = xy[1];
+                node.labelOverride = labelOverride;
                 if(freshIDs !== undefined && freshIDs){
                     const newID = getUID();
                     oldToNewIDMapping.set(node.id, newID);
@@ -131,6 +133,7 @@ export class GraphSerializer {
             });
 
             data.nodes.push({
+                labelOverride: node.labelOverride,
                 id: node.id,
                 label: node.label,
                 xy: [node.xTranslation, node.yTranslation],

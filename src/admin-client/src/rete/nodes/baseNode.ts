@@ -11,6 +11,7 @@ export abstract class BaseNode<
     Outputs extends Record<string, BaseSocket>,
     Controls extends Record<string, NodeControl<any>>
 > extends ClassicPreset.Node<Inputs, Outputs, Controls> implements DataflowNode {
+    labelOverride?: string;
     xTranslation: number = 0;
     yTranslation: number = 0;
     type: NodeType;
