@@ -161,11 +161,12 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
                 data-testid="node"
             >
                     <Container>
-                        <Row>
-                            <Col className="title" data-testid={"title"}>{label}</Col>
-                            <Col>
+                        <Row className={"align-items-sm-center justify-content-sm-start"}>
+                            <Col className="title" data-testid={"title"} sm={"auto"}>{label}</Col>
+                            <Col sm={"auto"}>
                                 <Drag.NoDrag>
                                     <Button
+                                        size={"sm"}
                                         onClick={()=>{
                                             setShow(!show);
                                         }}
@@ -203,7 +204,7 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
                         {labelOverride && !show &&
                             <Row>
                                 <Col className="title">
-                                    {labelOverride}
+                                    <b>{labelOverride}</b>
                                 </Col>
                             </Row>
                         }
