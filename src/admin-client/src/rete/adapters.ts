@@ -53,8 +53,13 @@ export function detectModule(name: string, nodes: ReteNode[]) {
  *
  * @param moduleNode
  * @param externalIOConnections
+ * @param externalNodes
  */
-export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  externalIOConnections: ConnProps[], externalNodes: ReteNode[]) {
+export function resolveIncomingModuleConnections(
+    moduleNode: Readonly<ModuleNode>,
+    externalIOConnections: readonly ConnProps[],
+    externalNodes: readonly ReteNode[]
+) {
     const internalNodes = moduleNode.getNodes();
     const internalIOConnections = moduleNode.getConnections();
     const resolvedInputConnections : ConnProps[] = []
@@ -145,7 +150,6 @@ export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  extern
                 if(outputConnection.targetInput.startsWith("input")) {
                     const inputNumber = (outputConnection.targetInput || "").replace("input", "");
                     const nr = Number.parseInt(inputNumber);
-                    console.log("intputnr", inputNumber);
                     const control = (targetNode as ChooseNode).getInputControlByIndex(nr);
                     if(control) {
                         control.setNoUpdate({sourceID: moduleOutputInternalConnection.source})
@@ -159,7 +163,7 @@ export function resolveIncomingModuleConnections(moduleNode: ModuleNode,  extern
 }
 
 
-function getModuleNonIONodesAndConnections(moduleNode: ModuleNode) {
+function getModuleNonIONodesAndConnections(moduleNode: Readonly<ModuleNode>) {
     const nodes = moduleNode.getNodes();
     const inOutNodes = nodes.filter((node)=> {
         return node instanceof ModuleInput || node instanceof ModuleOutput;
@@ -175,7 +179,7 @@ function getModuleNonIONodesAndConnections(moduleNode: ModuleNode) {
 }
 
 
-export async function flattenGraph(serializer: GraphSerializer, moduleManager: ModuleManager) {
+export async function flattenGraph(serializer: Readonly<GraphSerializer>, moduleManager: ModuleManager) {
     // serializer is used to create a copy of the graph to avoid modifying the original.
     const editor = new NodeEditor<Schemes>();
     const factory = new NodeFactory(moduleManager);
@@ -247,7 +251,7 @@ export async function flattenGraph(serializer: GraphSerializer, moduleManager: M
 }
 
 
-export async function createParseNodeGraph(serializer: GraphSerializer, moduleManager: ModuleManager ) {
+export async function createParseNodeGraph(serializer: Readonly<GraphSerializer>, moduleManager: ModuleManager ) {
     let subtrees: ParseNode[] = [];
 
 
@@ -309,7 +313,7 @@ export async function createParseNodeGraph(serializer: GraphSerializer, moduleMa
     return subtrees;
 }
 
-function isSubTreeRoot(node: ReteNode, parentCount: number) {
+function isSubTreeRoot(node: Readonly<ReteNode>, parentCount: Readonly<number>) {
     return parentCount === 0 || parentCount >=2 || node.type === NodeType.Root;
 }
 
@@ -324,7 +328,11 @@ function isSubTreeRoot(node: ReteNode, parentCount: number) {
  * @param reteNodes A map from node IDs to actual node data.
  * @return The root node of the built tree represented as a ParseNode.
  */
-function populateTree(startNode: NodeConnection, nodeConnections: Map<string, NodeConnection>, reteNodes: Map<string, {node: ParseableNode, isRoot: boolean}>): ParseNode {
+function populateTree(
+    startNode: Readonly<NodeConnection>,
+    nodeConnections: Readonly<Map<string, NodeConnection>>,
+    reteNodes: Readonly<Map<string, {node: ParseableNode, isRoot: boolean}>>
+): ParseNode {
     const rootSkogNode = reteNodes.get(startNode.id);
     if(!rootSkogNode) { throw new Error("Start node not found in nodes map")}
 
