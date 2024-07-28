@@ -4,13 +4,13 @@ import type {OutputNode} from "./nodes/outputNode";
 import {isReferenceNode} from "./nodes/referenceNode";
 import {isOutputNode} from "./nodes/outputNode";
 import {isInputNode} from "./nodes/inputNode";
-import {isBinaryNode, isNaryNode, isParseNode, NodeType} from "./nodes/parseNode";
+import {isBinaryNode, isNaryNode, isParseNode, isUnaryNode, NodeType} from "./nodes/parseNode";
 import type {RootNode} from "./nodes/rootNode";
 import {isRootNode} from "./nodes/rootNode";
 import type {DisplayNode} from "./nodes/displayNode";
 import {isDisplayNode} from "./nodes/displayNode";
 import {ChooseNode, compare} from "./nodes/chooseNode";
-import {getBinaryOperation, getNaryOperation} from "./math/operations";
+import {getBinaryOperation, getNaryOperation, getUnaryOperation} from "./math/operations";
 
 
 /**
@@ -256,6 +256,12 @@ function calculateNodeValue(tree: TreeState, node: ParseNode | undefined): numbe
         return 0;
     }
 
+    if(isUnaryNode(node)) {
+        const op = getUnaryOperation(node.type);
+        node.value = op(calculateNodeValue(tree, node.input));
+        return node.value;
+    }
+
     if(isBinaryNode(node)) {
         const op = getBinaryOperation(node.type);
         result = op( calculateNodeValue(tree, node.left), calculateNodeValue(tree, node.right))
@@ -387,6 +393,7 @@ function forEachNode(node: ParseNode, func: (node: ParseNode)=>void) {
             func(currentNode);
         }
 
+        if(currentNode?.input) { nodes.push(currentNode.input)}
         if(currentNode?.left)   { nodes.push(currentNode.left); }
         if(currentNode?.right)  { nodes.push(currentNode.right); }
         if(currentNode?.child)  { nodes.push(currentNode.child); }
@@ -402,6 +409,7 @@ function findNode(node: ParseNode, func: (node: ParseNode)=>boolean) : ParseNode
         if(currentNode && func(currentNode)) {
             return currentNode;
         }
+        if(currentNode?.input) { nodes.push(currentNode.input)}
         if(currentNode?.left)   { nodes.push(currentNode.left); }
         if(currentNode?.right)  { nodes.push(currentNode.right); }
         if(currentNode?.child)  { nodes.push(currentNode.child); }
