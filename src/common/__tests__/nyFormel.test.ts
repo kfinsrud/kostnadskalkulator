@@ -133,14 +133,14 @@ test('forwarder', ()=>{
     expect(result).toEqual(11.41);
 })
 
-test('thinning', ()=>{
+test('thinning1', ()=>{
     const result = t_harv_thinning_bb();
     console.log(result);
     expect(result).toEqual(25.329)
 })
 
 
-test('thinning', ()=>{
+test('thinning2', ()=>{
     const result = t_harv_thinning_bb(
         800,
         0.25,
@@ -160,7 +160,7 @@ test('thinning', ()=>{
     expect(result).toEqual(14.033)
 })
 
-test('thinning', ()=>{
+test('thinning3', ()=>{
     const result = t_harv_thinning_bb(
         800,
         0.25,
@@ -178,4 +178,24 @@ test('thinning', ()=>{
     );
     console.log(result);
     expect(result).toEqual(13.394)
+})
+
+test('thinning4', ()=>{
+    const result = t_harv_thinning_bb(
+        800,
+        0.19,
+        45,
+        0.8,
+        1,
+        1,
+        "Brunberg97",
+        0,
+        "striproad_with_midfield_machine",
+        1,
+        0.8,
+        20,
+        4
+    );
+    console.log(result);
+    expect(result).toEqual(11.24)
 })

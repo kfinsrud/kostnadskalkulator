@@ -282,6 +282,9 @@ export function t_forw_bb(
 }
 
 
+type ThinningModel = "Brunberg07" | "Brunberg97" | "Talbot16"
+type ThinningSystem =  "striproad" |"striproad_with_midfield_machine" | "striproad_with_midfield_chainsaw";
+
 export function t_harv_thinning_bb(
     Stems_ha = 1200,
     v = 0.4,
@@ -289,76 +292,136 @@ export function t_harv_thinning_bb(
     p_init_spruce = 0.95,
     L = 2,
     Y = 2,
-    modelversion = "Brunberg97",
+    modelversion: ThinningModel = "Brunberg97",
     Pharv_broadLeaves = 0,
-    thinningsystem = "striproad",
-    thinningnumber = 1,
+    thinningsystem: ThinningSystem = "striproad",
+    thinningnumber: 1 | 2 = 1,
     rd = 0.9,
     sr_sp = 20,
     sr_w = 4
 ) {
-    // Helper function
-    const trunkRng = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+    L = trunk_rng(L, 1, 4);
+    Y = trunk_rng(Y, 1, 4);
+    p_init_spruce = trunk_rng(p_init_spruce, 0, 1);
 
-    // Calculations
     const Nharv = Stems_ha * harvest_strength_pct / 100 / rd;
-    const W = sr_sp - sr_w;
-
-    const Nres = Stems_ha - Nharv;
+    const Nharv_tr = trunk_rng(Nharv, 400, 2000);
     const V_init = Stems_ha * v;
     const Vharv = V_init * harvest_strength_pct / 100;
-    const v_hrv = v * rd * Math.sqrt(rd);
-    const v_tr = trunkRng(v_hrv, 0, 3);
-    L = trunkRng(L, 1, 4);
-    Y = trunkRng(Y, 1, 4);
-    p_init_spruce = trunkRng(p_init_spruce, 0, 1);
+    const v_tr = v_tr_thinning(v, rd);
 
-    // t1 calculation
-    const Nharv_tr = trunkRng(Nharv, 400, 2000);
-    let K;
-    switch(thinningsystem) {
-        case "striproad_with_midfield_machine": K = 15.4; break;
-        case "striproad_with_midfield_chainsaw": K = 20.2; break;
-        default: K = 15.6;
-    }
-    const S = (
-        thinningsystem === "striproad_with_midfield_machine" || thinningsystem === "striproad_with_midfield_chainsaw" ?
-            2 * W / 3 : W
-    );
-    const t1 = trunkRng(1000000 / (S * Nharv_tr * K * (1 + (50/Nharv_tr) - 0.1*Y - 0.1*L)), 2, 20);
+    const t1 = t1_func(
+        Nharv_tr,
+        L, Y,
+        thinningsystem,
+        sr_sp,
+        sr_w
+    )
 
-    // t2 calculation
-    const phindrance = 0.35 / (1 + Math.exp(2.5*(1.9 - v_tr)));
-    const pdoublesawed = 1 / (1 + Math.exp(3.5*(1.6 - v_tr)));
-    const pdifficult = 0.7 / (1 + Math.exp(4.4 - (2 * v_tr)));
-    const p = thinningnumber === 1 && v_tr <= 0.2 ? p_init_spruce :
-        thinningnumber === 2 && v_tr <= 0.2 ? 0.5 * p_init_spruce : 0;
+    const t2 = v_tr <= 0.2 ?
+        t2_low_v(
+            v_tr,
+            thinningnumber,
+            p_init_spruce,
+            Stems_ha,
+            rd,
+            Pharv_broadLeaves,
+            thinningsystem,
+            Nharv
+        )
+        :
+        t2_high_v(
+            v_tr,
+            modelversion
+        );
 
-    const cc_intc = modelversion === "Talbot16" ? 21.3 : modelversion === "Brunberg07" ? 24 : 27.3;
-    const cc_slp = modelversion === "Talbot16" ? 157.92 : modelversion === "Brunberg07" ? 35 : 56;
-
-    const t21 =  v_tr <= 0.2 ?
-        (v_tr * (78 * p + 89) + Nres * (0.0025 * p + 0.0019) + 20.3) + 2.3 * Pharv_broadLeaves :
-        (cc_intc + cc_slp*v_tr + 28*pdoublesawed + 15*phindrance + 37*pdifficult);
-
-    const thinningtypecorr = v_tr <= 0.2 && rd > 0.95 && rd <= 1 ? -1.3 :
-        v_tr <= 0.2 && rd > 1 ? -16*(Math.min(rd, 1.1) - 1) : 0;
-
-    const thinningsyscorr =  v_tr <= 0.2 && thinningsystem === "striproad_with_midfield_machine" ? 3.4 * 0.3 :
-         v_tr <= 0.2 && thinningsystem === "striproad_with_midfield_chainsaw" ? 8.3 * 0.17 : 0;
-
-    const t2 = t21 + thinningtypecorr + thinningsyscorr;
-
-    // t3 calculation
     const t3 = 4.3;
 
-    // Final calculations
     const ttot_cmin_tree = t1 + t2 + t3;
     const harv_G15min_tree = ttot_cmin_tree * 1.3 / 100;
     const harv_G15min_ha = harv_G15min_tree * Nharv;
     const harv_G15min_m3 = harv_G15min_ha / Vharv;
     const harv_m3_G15h = 60 / harv_G15min_m3;
 
-    // Return only harv_m3_G15h
     return Number(harv_m3_G15h.toFixed(3));
+}
+
+function t1_func(
+    Nharv_tr: number,
+    L: number,
+    Y: number,
+    thinningsystem: ThinningSystem,
+    sr_sp: number,
+    sr_w: number
+) {
+    const W = sr_sp - sr_w;
+    let K;
+    switch(thinningsystem) {
+        case "striproad_with_midfield_machine": K = 15.4;  break;
+        case "striproad_with_midfield_chainsaw": K = 20.2; break;
+        case "striproad" : K = 15.6;
+    }
+    const S = thinningsystem == "striproad" ? W : 2 * W / 3;
+    return trunk_rng(1000000 / (S * Nharv_tr * K * (1 + (50/Nharv_tr) - 0.1*Y - 0.1*L)), 2, 20);
+}
+
+
+/**
+ * t21 when v_tr > 0.2
+ * @param v_tr
+ * @param thinningnumber
+ * @param modelversion
+ */
+function t2_high_v(
+    v_tr: number,
+    modelversion: ThinningModel,
+) {
+    const phindrance = 0.35 / (1 + Math.exp(2.5*(1.9 - v_tr)));
+    const pdoublesawed = 1 / (1 + Math.exp(3.5*(1.6 - v_tr)));
+    const pdifficult = 0.7 / (1 + Math.exp(4.4 - (2 * v_tr)));
+
+    const cc_intc = modelversion === "Talbot16" ? 21.3 : modelversion === "Brunberg07" ? 24 : 27.3;
+    const cc_slp = modelversion === "Talbot16" ? 157.92 : modelversion === "Brunberg07" ? 35 : 56;
+
+    return cc_intc + cc_slp*v_tr + 28 * pdoublesawed + 15 * phindrance + 37 * pdifficult;
+}
+
+
+function t2_low_v(
+    v_tr: number,
+    thinningnumber: number,
+    p_init_spruce: number,
+    Stems_ha: number,
+    rd: number,
+    Pharv_broadLeaves: number,
+    thinningsystem: ThinningSystem,
+    Nharv: number
+) {
+    let thinningtypecorr;
+    if(rd <= 0.95) {
+        thinningtypecorr = 0;
+    } else if (rd > 1) {
+        thinningtypecorr = -16 * (Math.min(rd, 1.1) - 1);
+    } else {
+        thinningtypecorr = -1.3;
+    }
+
+    let thinningsyscorr;
+    switch(thinningsystem) {
+        case "striproad_with_midfield_machine": thinningsyscorr = 3.4 * 0.3; break;
+        case "striproad_with_midfield_chainsaw": thinningsyscorr = 8.3 * 0.17; break;
+        case "striproad": thinningsyscorr = 0; break;
+    }
+    const Nres = Stems_ha - Nharv;
+
+    const p = thinningnumber === 1 ? p_init_spruce : 0.5 * p_init_spruce
+    return v_tr * (78 * p + 89) + Nres * (0.0025 * p + 0.0019) + 20.3 + 2.3 * Pharv_broadLeaves + thinningtypecorr + thinningsyscorr;
+}
+
+function v_tr_thinning(
+    v: number,
+    rd: number,
+) {
+    const v_hrv = v * rd * Math.sqrt(rd);
+    return trunk_rng(v_hrv, 0, 3);
 }
