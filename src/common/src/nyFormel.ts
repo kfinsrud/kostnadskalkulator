@@ -369,7 +369,6 @@ function t1_func(
 /**
  * t21 when v_tr > 0.2
  * @param v_tr
- * @param thinningnumber
  * @param modelversion
  */
 function t2_high_v(
