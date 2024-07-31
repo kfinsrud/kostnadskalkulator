@@ -14,7 +14,7 @@ import {
     OutputNode,
     TreeState
 } from "../parseTree";
-import {isDropdownInputNode} from "../parseTree/nodes/inputNode";
+import {isDropdownInputNode, NumberInputNode} from "../parseTree/nodes/inputNode";
 import {parseHtmlString} from "../util/htmlParsing";
 import DOMPurify from "dompurify";
 
@@ -44,7 +44,7 @@ export function ResultGraph(
     const xUnit = sanitizeHTML(node?.unit)
 
     const series : { labels: string[], values: string[] } = selectGraphXAxisInput(node);
-    const xValues = series.values.map(v=>parseInt(v));
+    const xValues = series.values.map(v=>parseFloat(v));
     const results = props.treeState && getResultsForInputs(props.treeState, node?.id || "", xValues);
 
 
@@ -146,6 +146,9 @@ function DrawGraph(
                 enabled: false
             }
         },
+        dataLabels: {
+            enabled: false
+        },
         series: props.series,
         legend: {
             position: 'top',
@@ -196,7 +199,7 @@ function DrawGraph(
         <ReactApexChart
             options={chartOptions}
             series={props.series}
-            type="line"
+            type={"line"}
             height={250}
         />
     )
