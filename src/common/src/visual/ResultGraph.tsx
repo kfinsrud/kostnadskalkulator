@@ -307,39 +307,3 @@ function minMaxRange(input: NumberInputNode) {
     }
 }
 
-function rangeAdaptive(input: NumberInputNode) {
-    if(input.legalValues.length == 0) {
-        return rangeOystein(input, 10);
-    }
-    let min;
-    let max;
-    for(const legalRange of input.legalValues) {
-        if(min === undefined || (legalRange.min ?? 0) < min) {
-            min = legalRange.min ?? 0;
-        }
-        if(max === undefined || (legalRange.max ?? 0) > max) {
-            max = legalRange.max ?? 0;
-        }
-    }
-
-    const valueRange = max! - min!;
-    const stepSize = valueRange / 20;
-
-    const valueOverStepsize = input.value / stepSize;
-    const indexOfValue = Math.floor(valueOverStepsize);
-    const adjustedStepSize = input.value / indexOfValue;
-
-    const range = [];
-    const labelRange = []
-    for (let i = 0; i <= 20; i++) {
-        const value = (i == indexOfValue) ? input.value : i * adjustedStepSize;
-        const labelString = (value==Math.floor(value)) ? value.toString() : value.toFixed(1);
-        range.push(value.toString());
-        // labelRange.push((i%2==0)?labelString : "");
-        labelRange.push(value.toString());
-    }
-    return {
-        labels: labelRange,
-        values: range
-    }
-}
