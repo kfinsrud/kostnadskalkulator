@@ -216,17 +216,20 @@ function selectGraphXAxisInput(input: InputNode | undefined) {
             values: (input as DropdownInput).dropdownAlternatives.map(d=>d.value.toString())
         }
     } else {
-        const steps = 5;
-        const baseValue = input.value;
-        const stepSize = Math.ceil(baseValue * 0.1);
-        const range = [];
-        for(let i = -steps; i<= steps; i++) {
-            range.push((i*stepSize + baseValue).toString());
-        }
-        return {
-            labels: range,
-            values: range
-        }
+        // return rangeOystein(input as NumberInputNode, 10);
+        // return rangeAdaptive(input as NumberInputNode);
+        return minMaxRange(input as NumberInputNode);
+        // const steps = 5;
+        // const baseValue = input.value;
+        // const stepSize = Math.ceil(baseValue * 0.1);
+        // const range = [];
+        // for(let i = -steps; i<= steps; i++) {
+        //     range.push((i*stepSize + baseValue).toString());
+        // }
+        // return {
+        //     labels: range,
+        //     values: range
+        // }
     }
 }
 
@@ -239,5 +242,104 @@ function getSelectedXLabel(input: InputNode | undefined) {
             return options.find(option => option.value === input.value)?.label ?? ""
         default:
             return ""
+    }
+}
+
+
+function rangeOystein(input: NumberInputNode, steps: number = 5) {
+    const baseValue = input.value;
+    const stepSize = Math.ceil(baseValue * 0.1);
+    const range = [];
+    const labelRange = [];
+    for(let i = -steps; i<= steps; i++) {
+        const value = i * stepSize + baseValue;
+        range.push(value.toString());
+        if(i % 2 == 0) {
+            labelRange.push(value.toString());
+        } else {
+            labelRange.push("");
+        }
+    }
+    return {
+        labels: labelRange,
+        values: range
+    }
+
+}
+
+function minMaxRange(input: NumberInputNode) {
+    if(input.legalValues.length == 0) {
+        return rangeOystein(input, 10);
+    }
+    let min;
+    let max;
+    for(const legalRange of input.legalValues) {
+        if(min === undefined || (legalRange.min ?? 0) < min) {
+            min = legalRange.min ?? 0;
+        }
+        if(max === undefined || (legalRange.max ?? 0) > max) {
+            max = legalRange.max ?? 0;
+        }
+    }
+
+    const valueRange = max! - min!;
+    const stepSize = valueRange / 10;
+    let decimals;
+    if(stepSize < 0.5) {
+        decimals = 2;
+    } else if ( stepSize < 10) {
+        decimals = 1;
+    } else {
+        decimals = 0;
+    }
+
+    const range = [];
+    const labelRange = []
+    for (let i = 0; i <= 10; i++) {
+        const value = min! + i * stepSize;
+        const labelString = (value==Math.floor(value)) ? value.toString() : value.toFixed(decimals);
+        range.push(value.toString());
+        labelRange.push(labelString);
+    }
+    return {
+        labels: labelRange,
+        values: range
+    }
+}
+
+function rangeAdaptive(input: NumberInputNode) {
+    if(input.legalValues.length == 0) {
+        return rangeOystein(input, 10);
+    }
+    let min;
+    let max;
+    for(const legalRange of input.legalValues) {
+        if(min === undefined || (legalRange.min ?? 0) < min) {
+            min = legalRange.min ?? 0;
+        }
+        if(max === undefined || (legalRange.max ?? 0) > max) {
+            max = legalRange.max ?? 0;
+        }
+    }
+
+    const valueRange = max! - min!;
+    const stepSize = valueRange / 20;
+
+    const valueOverStepsize = input.value / stepSize;
+    const indexOfValue = Math.floor(valueOverStepsize);
+    const adjustedStepSize = input.value / indexOfValue;
+
+    const range = [];
+    const labelRange = []
+    for (let i = 0; i <= 20; i++) {
+        const value = (i == indexOfValue) ? input.value : i * adjustedStepSize;
+        const labelString = (value==Math.floor(value)) ? value.toString() : value.toFixed(1);
+        range.push(value.toString());
+        // labelRange.push((i%2==0)?labelString : "");
+        labelRange.push(value.toString());
+    }
+    return {
+        labels: labelRange,
+        values: range
     }
 }
