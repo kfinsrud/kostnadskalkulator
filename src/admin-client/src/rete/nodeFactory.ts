@@ -17,6 +17,7 @@ import {DisplayListNode} from "./nodes/displayNodes/displayListNode/displayListN
 import {GraphDisplayNode} from "./nodes/displayNodes/graphDisplayNode/graphDisplayNode";
 import {NodeAction} from "./nodeActions";
 import {UnaryNode} from "./nodes/mathNodes/unaryNode";
+import {CommentNode} from "./nodes/utility/commentNode";
 
 
 export class NodeFactory {
@@ -54,6 +55,7 @@ export class NodeFactory {
             case NodeType.Ceil: return new UnaryNode(NodeType.Ceil, this.dispatch, id);
             case NodeType.Floor: return new UnaryNode(NodeType.Floor, this.dispatch, id);
             case NodeType.Round: return new UnaryNode(NodeType.Round, this.dispatch, id);
+            case NodeType.Comment: return new CommentNode(this.dispatch, id);
         }
         throw new Error("NodeFactory.createNode() was invoked with " + type + " which has no implementation in createNode().");
     }

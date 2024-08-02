@@ -8,6 +8,7 @@ import {GraphSerializer} from "./graphSerializer";
 import {NodeFactory} from "./nodeFactory";
 import {ModuleManager} from "./moduleManager";
 import {ChooseNode} from "./nodes/controlNodes/chooseNode";
+import {ParseableBaseNode} from "./nodes/parseableBaseNode";
 
 
 interface NodeConnection {
@@ -258,7 +259,7 @@ export async function createParseNodeGraph(serializer: Readonly<GraphSerializer>
     const flattened = await flattenGraph(serializer, moduleManager);
 
 
-    const nodes = flattened.nodes;
+    const nodes = flattened.nodes.filter(n=>n instanceof ParseableBaseNode);
 
     const connProps = flattened.connections;
 

@@ -591,7 +591,8 @@ export class Editor {
                 ["Inputs", inputNodes],
                 ["Displays", displayNodes],
                 ["Module", moduleNodes],
-                ["Output", ()=>{ return this.factory.createNode(NodeType.Output) as ReteNode}]
+                ["Output", ()=>{ return this.factory.createNode(NodeType.Output) as ReteNode}],
+                ["Comment", ()=>{return this.factory.createNode(NodeType.Comment) as ReteNode}]
             ])
         });
     }

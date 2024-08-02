@@ -85,5 +85,6 @@ export enum NodeType {
     Exp = "Exp",
     Ceil = "Ceil",
     Floor = "Floor",
-    Round = "Round"
+    Round = "Round",
+    Comment = "Commment"
 }
