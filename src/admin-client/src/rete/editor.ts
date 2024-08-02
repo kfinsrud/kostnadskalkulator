@@ -194,8 +194,8 @@ export class Editor {
 
 
     private async dispatchAction(action: NodeAction) {
-        console.log(action, this.context.editor.getNode(action.nodeID));
         if(this.loading ) return;
+        console.log(action, this.context.editor.getNode(action.nodeID));
 
         switch(action.type) {
             case NodeActionType.Disconnect: {
@@ -208,7 +208,7 @@ export class Editor {
                 await this.context.area.update('node', action.nodeID);
             } break;
             case NodeActionType.StateChange: {
-                if(this.hasModuleLoaded()) {
+                if(this.hasModuleLoaded() || this.isDataflowUpdateActive) {
                     return;
                 }
                 this.updateNodeWithAction(action);
@@ -251,7 +251,6 @@ export class Editor {
         for(const node of this.context.editor.getNodes()) {
             await this.context.engine.fetch(node.id);
         }
-        this.isDataflowUpdateActive = false;
         // for(const action of this.queuedActions.reverse()) {
         //     this.updateNodeWithAction(action);
         //     await this.context.area.update('node', action.nodeID);
@@ -261,6 +260,7 @@ export class Editor {
         if(this.currentModule == undefined) {
             await this.signalOnChange("update dataflow");
         }
+        this.isDataflowUpdateActive = false;
     }
 
 
