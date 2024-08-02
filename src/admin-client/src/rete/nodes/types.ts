@@ -15,8 +15,9 @@ import {DisplayListNode} from "./displayNodes/displayListNode/displayListNode";
 import {ChooseNode} from "./controlNodes/chooseNode";
 import {GraphDisplayNode} from "./displayNodes/graphDisplayNode/graphDisplayNode";
 import {UnaryNode} from "./mathNodes/unaryNode";
+import {CommentNode} from "./utility/commentNode";
 
-export type ReteNode = ParseableNode | ModuleInput | ModuleOutput | ModuleNode;
+export type ReteNode = ParseableNode | ModuleInput | ModuleOutput | ModuleNode | CommentNode;
 
 export type ParseableNode = UnaryNode | NumberNode | BinaryNode | NaryNode | NumberInputNode | OutputNode | DropdownInputNode | DisplayPieNode | DisplayBarNode | ChooseNode | DisplayPreviewNode | DisplayListNode | GraphDisplayNode;
 
