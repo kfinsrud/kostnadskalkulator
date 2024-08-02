@@ -185,7 +185,7 @@ test('thinning4', ()=>{
         800,
         0.19,
         45,
-        0.8,
+        0.4,
         1,
         1,
         "Brunberg97",
@@ -197,5 +197,5 @@ test('thinning4', ()=>{
         4
     );
     console.log(result);
-    expect(result).toEqual(11.24)
+    expect(result).toEqual(12.132)
 })
