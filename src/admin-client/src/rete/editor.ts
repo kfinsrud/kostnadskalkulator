@@ -546,7 +546,9 @@ export class Editor {
     private createContextMenu() {
         const nodeTypesToDefinition : (nodeTypes: NodeType[])=>ItemDefinition<Schemes>[] = (types) =>{
             return types.map(node=>{
-                return [node.toString(), ()=>{return this.factory.createNode(node) as ReteNode}]
+                // Ugly fix to the first added display simply being named display
+                const label = (node == NodeType.Display)? "PieDisplay" : node.toString();
+                return [label, ()=>{return this.factory.createNode(node) as ReteNode}]
             })
         }
         const mathNodes = nodeTypesToDefinition ([
