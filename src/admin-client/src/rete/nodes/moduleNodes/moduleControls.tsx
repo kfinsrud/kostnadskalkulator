@@ -48,6 +48,7 @@ export function ModuleNodeControl( props: {data: NodeControl<ModuleNodeControlDa
                 }}
 
             >
+                <option>...</option>
                 {props.data.get('availableModules').map( module => {
                     return <option>{module}</option>
                 })
