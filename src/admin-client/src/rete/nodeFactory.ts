@@ -35,7 +35,7 @@ export class NodeFactory {
             case NodeType.Number: return new NumberNode(0, this.dispatch, id);
             case NodeType.NumberInput: return new NumberInputNode(this.dispatch, id);
             case NodeType.DropdownInput: return new DropdownInputNode(this.dispatch, id);
-            case NodeType.Display: return new DisplayPieNode(this.dispatch, id);
+            case NodeType.PieDisplay: return new DisplayPieNode(this.dispatch, id);
             case NodeType.BarDisplay: return new DisplayBarNode(this.dispatch, id);
             case NodeType.PreviewDisplay: return new DisplayPreviewNode(this.dispatch, id);
             case NodeType.ListDisplay: return new DisplayListNode(this.dispatch, id);

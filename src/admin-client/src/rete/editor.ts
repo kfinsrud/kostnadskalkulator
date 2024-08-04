@@ -577,7 +577,7 @@ export class Editor {
             NodeType.ModuleOutput
         ])
         const displayNodes = nodeTypesToDefinition ( [
-            NodeType.Display,
+            NodeType.PieDisplay,
             NodeType.BarDisplay,
             NodeType.PreviewDisplay,
             NodeType.ListDisplay,

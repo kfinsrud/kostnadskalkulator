@@ -17,7 +17,7 @@ export class DisplayPieNode extends ParseableBaseNode <
         private dispatch: (action: NodeAction) => void = ()=>{},
         id?: string,
     ) {
-        super(NodeType.Display, 600, 400, "Pie Chart", id);
+        super(NodeType.PieDisplay, 600, 400, "Pie Chart", id);
 
         this.addInput("input",
             new ClassicPreset.Input(
@@ -77,7 +77,7 @@ export class DisplayPieNode extends ParseableBaseNode <
             id: this.id,
             pieType: this.controls.c.get("pieType"),
             unit: this.controls.c.get("unit"),
-            type: NodeType.Display,
+            type: NodeType.PieDisplay,
             value: 0,
             inputs: [],
             name: this.controls.c.get("name"),

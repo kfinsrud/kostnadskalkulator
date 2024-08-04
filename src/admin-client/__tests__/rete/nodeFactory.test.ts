@@ -31,7 +31,7 @@ describe('NodeFactory', () => {
         expect(factory.createNode(NodeType.Number)).toBeInstanceOf(NumberNode);
         expect(factory.createNode(NodeType.NumberInput)).toBeInstanceOf(NumberInputNode);
         expect(factory.createNode(NodeType.DropdownInput)).toBeInstanceOf(DropdownInputNode);
-        expect(factory.createNode(NodeType.Display)).toBeInstanceOf(DisplayPieNode);
+        expect(factory.createNode(NodeType.PieDisplay)).toBeInstanceOf(DisplayPieNode);
         expect(factory.createNode(NodeType.BarDisplay)).toBeInstanceOf(DisplayBarNode);
         expect(factory.createNode(NodeType.PreviewDisplay)).toBeInstanceOf(DisplayPreviewNode);
         expect(factory.createNode(NodeType.ListDisplay)).toBeInstanceOf(DisplayListNode);
