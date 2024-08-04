@@ -27,7 +27,7 @@ export interface DisplayArrangement {
 }
 
 export function isDisplayNode (node: ParseNode) : node is DisplayNode {
-    return [NodeType.PieDisplay, NodeType.BarDisplay, NodeType.PreviewDisplay, NodeType.ListDisplay, NodeType.GraphDisplay].includes(node.type)
+    return [NodeType.Display, NodeType.BarDisplay, NodeType.PreviewDisplay, NodeType.ListDisplay, NodeType.GraphDisplay].includes(node.type)
 }
 
 

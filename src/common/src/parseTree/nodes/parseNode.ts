@@ -59,7 +59,7 @@ export function isUnaryNode(node: ParseNode) : boolean {
 export enum NodeType {
     Reference = "Reference",
     Root = "Root",
-    PieDisplay = "PieDisplay",
+    Display = "Display",
     GraphDisplay = "GraphDisplay",
     BarDisplay = "BarDisplay",
     PreviewDisplay = "PreviewDisplay",

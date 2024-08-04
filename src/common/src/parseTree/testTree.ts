@@ -271,7 +271,7 @@ const rektangelAreal: OutputNode = {
 
 const grafOmkrets : DisplayNode = {
     id: getUniquieID(),
-    type: NodeType.PieDisplay,
+    type: NodeType.Display,
     name: "Omkrets",
     value: 0,
     inputs: [
@@ -309,7 +309,7 @@ const arealGraf: DisplayNode =  {
     id: getUniquieID(),
     name: "Areal",
     value: 0,
-    type: NodeType.PieDisplay,
+    type: NodeType.Display,
     inputs: [
         {
             id: getUniquieID(),
