@@ -8,6 +8,7 @@ import {selectFormulaInfo, selectPages} from "../../state/store";
 import React, {useState} from "react";
 import {ImportExportModal} from "../importExportModal/ImportExportModal";
 import {EditorDataPackage} from "../../rete/editor";
+import {useTranslation} from "react-i18next";
 
 
 function DropdownItemWithKeyBind(
@@ -23,6 +24,7 @@ function DropdownItemWithKeyBind(
  * The dropdown menu items for the navigation bar
  */
 export function NavBarDropdowns(props: {functions: ReteFunctions | null}) {
+    const {t} = useTranslation();
     const dispatch = useAppDispatch();
     const formulaInfo = useAppSelector(selectFormulaInfo);
     const pagesInfo = useAppSelector(selectPages)
@@ -39,7 +41,7 @@ export function NavBarDropdowns(props: {functions: ReteFunctions | null}) {
 
     return (
         <>
-            <NavDropdown title={"File"} id={"file-dropdown"}>
+            <NavDropdown title={t('buttons.main_ui.file_dropdown.title')} id={"file-dropdown"}>
                 <NavDropdown.Item onClick={() => {
                     if(showImportExportMenu) {
                         setShowImportExportMenu(!showImportExportMenu)
@@ -48,22 +50,22 @@ export function NavBarDropdowns(props: {functions: ReteFunctions | null}) {
                         updateExportData().then(()=>{setShowImportExportMenu(true)})
                     }
                 }}>
-                    {"Import/Export"}
+                    {t('buttons.main_ui.file_dropdown.alt_import_export')}
                 </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => {
                     props.functions?.clear()
-                }}>Clear</NavDropdown.Item>
+                }}>{t('buttons.main_ui.file_dropdown.alt_clear')}</NavDropdown.Item>
             </NavDropdown>
-            <NavDropdown title={"View"} id={"view-dropdown"}>
+            <NavDropdown title={t('buttons.main_ui.view_dropdown.title')} id={"view-dropdown"}>
                 <NavDropdown.Item onClick={() => {
                     props.functions?.viewControllers.resetView();
-                }}><DropdownItemWithKeyBind name={"View all"} keyBind={"ctrl+a"}/></NavDropdown.Item>
+                }}><DropdownItemWithKeyBind name={t('buttons.main_ui.view_dropdown.alt_view_all')} keyBind={"ctrl+a"}/></NavDropdown.Item>
                 <NavDropdown.Item
                     onClick={()=>{
                         props.functions?.viewControllers.focusSelectedNode();
                     }}
                 >
-                    <DropdownItemWithKeyBind name={"Focus SEL"} keyBind={"ctrl+f"}/>
+                    <DropdownItemWithKeyBind name={t('buttons.main_ui.view_dropdown.alt_focus_sel')} keyBind={"ctrl+f"}/>
                 </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title={"Test"} id={"file-dropdown"}>

@@ -1,0 +1,78 @@
+{
+  "titles": {
+    "main_ui": {
+      "nav": {
+        "tool_name": "Editor"
+      }
+    },
+    "import_export_modal": {
+      "local_storage": "Local Browser Storage",
+      "db_storage": "Database Storage",
+      "calculator_table": "Database stored calculators",
+      "calculator_table_name_col": "Name",
+      "calculator_table_ver_col": "Version",
+      "calculator_table_pub_col": "Published",
+      "calculator_table_WIP_col": "WIP"
+    }
+  },
+  "general": {
+    "main_ui": {
+      "sign_in_as": "Signed in as"
+    },
+    "import_export_modal": {
+      "loading_calculators" : "Loading"
+    }
+  },
+  "tooltips": {
+    "add_module": "Add module",
+    "delete_module": "Delete module"
+  },
+  "instructions": {
+    "import_export_modal": {
+      "db_storage": "The recommended way to save a calculator. The calculator can be saved with or without publishing it to customer app. Alternatively one can also publish it as WIP. WIP calculators are only accessible through the /dev route of the app. These are meant for testing only.",
+      "local_storage": "The browser storage only have capacity for one calculator, and should only be used temporarily"
+    }
+  },
+  "warnings": {
+    "import_export_modal": {
+      "cannot_save_empty": "Cannot save empty graph to database",
+      "cannot_save_no_name_or_version" : "Cannot save a calculator without a name and version",
+      "no_calculators": "No calculators found",
+      "api_error": "Error in communication with API",
+      "save_successful_db" : "Successfully saved to database",
+      "invalid_auth_token": "Invalid authentication token, try logging in and out again",
+      "error_saving_db": "Error saving to database",
+      "error_auth_token_retrieval": "Error getting authentication token, try logging in and out again"
+    }
+  },
+  "buttons": {
+    "main_ui": {
+      "file_dropdown": {
+        "title": "File",
+        "alt_import_export": "Import/Export",
+        "alt_clear": "Clear"
+      },
+      "view_dropdown": {
+        "title": "View",
+        "alt_view_all": "View all",
+        "alt_focus_sel": "Focus SEL"
+      }
+    },
+    "import_export_modal" : {
+      "local_storage": {
+        "restore" : "Restore",
+        "save" : "Save"
+      },
+      "db_storage": {
+        "export" : "Export",
+        "exporting" : "Exporting...",
+        "export_alternatives": {
+          "save": "Save only",
+          "publish": "Save and publish",
+          "developerPublish": "Save and publish as WIP"
+        }
+      },
+      "refresh" : "Force refresh"
+    }
+  }
+}

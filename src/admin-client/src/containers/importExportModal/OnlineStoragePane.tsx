@@ -4,6 +4,7 @@ import {FormulaInfoContainer} from "../formulaInfoContainer";
 import {Button, ButtonGroup, Dropdown, DropdownButton, Spinner, Stack, Table} from "react-bootstrap";
 import {useEffect, useRef, useState} from "react";
 import {useServices} from "../../contexts/ServiceContext";
+import {useTranslation} from 'react-i18next';
 
 /**
  * A pane for importing and exporting calculators from/to the online database through the API
@@ -12,27 +13,27 @@ export function OnlineStoragePane(props: {
     onLoad: (schema: Calculator["reteSchema"]) => void,
     calculator: Calculator
 }) {
-
+    const {t} = useTranslation();
     // fetch metadata of stored calculators from the API
     const {data, error, isLoading, refetch} = useGetCalculatorsInfoQuery()
     return (
         <>
-            <h3>{"Database Storage"}</h3>
+            <h3>{t("titles.import_export_modal.db_storage")}</h3>
             <p>
-                {"The recommended way to save a calculator. The calculator can be saved with or without publishing it to customer app."}
+                {t('instructions.import_export_modal.db_storage')}
             </p>
             <Stack className={"mb-4"} direction={"horizontal"} gap={3}>
                 <FormulaInfoContainer/>
                 <SaveToAPI onSaved={() => refetch()} calculator={props.calculator} />
             </Stack>
-            <h5>{"Database stored calculators"}</h5>
+            <h5>{t('titles.import_export_modal.calculator_table')}</h5>
             <Table size={"sm"}>
                 <thead>
                 <tr>
-                    <th>Name</th>
-                    <th className={"text-end"}>Version</th>
-                    <th className={"text-end"}>Published</th>
-                    <th className={"text-end"}>WIP</th>
+                    <th>{t('titles.import_export_modal.calculator_table_name_col')}</th>
+                    <th className={"text-end"}>{t('titles.import_export_modal.calculator_table_ver_col')}</th>
+                    <th className={"text-end"}>{t('titles.import_export_modal.calculator_table_pub_col')}</th>
+                    <th className={"text-end"}>{t('titles.import_export_modal.calculator_table_WIP_col')}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -40,16 +41,16 @@ export function OnlineStoragePane(props: {
                 {data && !data.length &&
                     <tr>
                         <td colSpan={3}>
-                            {"No calculators found"}
+                            {t('warnings.import_export_modal.no_calculators')}
                         </td>
                     </tr>
                 }
                 </tbody>
             </Table>
-            {error && <p>{"Error in communication with API"}</p>}
+            {error && <p>{t('warnings.import_export_modal.api_error')}</p>}
             {isLoading && <Spinner />}
             <Button onClick={refetch}>
-                {"Force Refresh"}
+                {t('buttons.import_export_modal.refresh')}
             </Button>
         </>
     )
@@ -64,6 +65,7 @@ function SaveToAPI(props: {
     calculator: Calculator,
     onSaved: () => void,
 }) {
+    const {t} = useTranslation();
     const [addCalculator, {isLoading}] = useAddCalculatorMutation()
     const {authService} = useServices()
 
@@ -71,25 +73,25 @@ function SaveToAPI(props: {
     const sendToAPI = async (publish: boolean, developerMode: boolean) => {
         if (!props.calculator.reteSchema?.graph || props.calculator.treeNodes?.length === 1) {
 
-            window.alert("Cannot save empty graph to database")
+            window.alert(t('warnings.import_export_modal.cannot_save_empty'))
         } else if (!props.calculator.name || !props.calculator.version) {
-            window.alert("Cannot save a calculator without a name and version")
+            window.alert(t('warnings.import_export_modal.cannot_save_no_name_or_version'))
         } else {
             const updatedCalculator = {...props.calculator, published: publish, disabled: developerMode}
             authService.getToken()
                 .then(token =>
                     addCalculator({calculator: updatedCalculator, token: token})
                         .unwrap()
-                        .then(() => window.alert("Successfully saved to database"))
+                        .then(() => window.alert(t('warnings.import_export_modal.save_successful_db')))
                         .catch((err) => {
                             if ('status' in err && err.status === 401) {
-                                window.alert("Invalid authentication token, try logging in and out again")
+                                window.alert(t('warnings.import_export_modal.invalid_auth_token'))
                             } else {
-                                window.alert("Error saving to database")
+                                window.alert('warnings.import_export_modal.error_saving_db')
                             }
                         })
                 )
-                .catch(() => window.alert("Error getting authentication token, try logging in and out again"))
+                .catch(() => window.alert(t('warnings.import_export_modal.error_auth_token_retrieval')))
         }
     }
 
@@ -118,10 +120,11 @@ function SaveToAPI(props: {
 
     return (
         <>
-            <DropdownButton id={"save options"} as={ButtonGroup} title={isLoading ? "Exporting..." : "Export"} style={{height: '58px'}}>
-                <Dropdown.Item onClick={() => sendToAPI(false, false)}>Save only</Dropdown.Item>
-                <Dropdown.Item onClick={() => sendToAPI(true, false)}>Save and publish</Dropdown.Item>
-                <Dropdown.Item onClick={() => sendToAPI(true, true)}>Save and publish as WIP</Dropdown.Item>
+            <DropdownButton id={"save options"} as={ButtonGroup} title={isLoading ?
+                t('buttons.import_export_modal.db_storage.exporting') : t('buttons.import_export_modal.db_storage.export')} style={{height: '58px'}}>
+                <Dropdown.Item onClick={() => sendToAPI(false, false)}>{t('buttons.import_export_modal.db_storage.export_alternatives.save')}</Dropdown.Item>
+                <Dropdown.Item onClick={() => sendToAPI(true, false)}>{t('buttons.import_export_modal.db_storage.export_alternatives.publish')}</Dropdown.Item>
+                <Dropdown.Item onClick={() => sendToAPI(true, true)}>{t('buttons.import_export_modal.db_storage.export_alternatives.developerPublish')}</Dropdown.Item>
             </DropdownButton>
         </>
     )
@@ -137,6 +140,7 @@ function TableRow(props: {
     onLoad: (schema: Calculator["reteSchema"]) => void,
     calculator: Calculator,
 }) {
+    const {t} = useTranslation();
     // format the version number to xxx.xxx.xxx without leading zeros
     const version: string = [
         props.calculator.version / 1000000,
@@ -171,7 +175,7 @@ function TableRow(props: {
                 <Button variant={'link'} onClick={() => setHaltFetch(false)}>
                     {props.calculator.name}
                 </Button>
-                {isLoading && " (loading...)"}
+                {isLoading && t('general.import_export_modal.loading_calculators')}
             </td>
             <td className={"text-end"}>{version}</td>
             <td className={"text-end"}>{(props.calculator.published && !props.calculator.disabled) ? '✓' : ''}</td>

@@ -1,0 +1,78 @@
+{
+  "titles": {
+    "main_ui": {
+      "nav": {
+        "tool_name": "Redigering"
+      }
+    },
+    "import_export_modal": {
+      "local_storage": "Lokallagring",
+      "db_storage": "Skylagring",
+      "calculator_table": "Skylagrede kalkulatorer",
+      "calculator_table_name_col": "Navn",
+      "calculator_table_ver_col": "Versjon",
+      "calculator_table_pub_col": "Publisert",
+      "calculator_table_WIP_col": "WIP"
+    }
+  },
+  "general": {
+    "main_ui": {
+      "sign_in_as": "Logget inn som"
+    },
+    "import_export_modal": {
+      "loading_calculators" : "Laster"
+    }
+  },
+  "tooltips": {
+    "add_module": "Ny modul",
+    "delete_module": "Slett modul"
+  },
+  "instructions": {
+    "import_export_modal": {
+      "db_storage": "Den anbefalte måten å lagre an kalkulator. Kalkulatoren kan lagres med eller uten publisering til applikasjonen. Alternativt kan man også publisere som WIP, dvs at den kun kan tas i bruk gjennom /dev ruten i applikasjonen. Dette er ment for testing.",
+      "local_storage": "Lokallagring har kun kapasitet for én kalkulator om gangen, og burde kun brukes kortsiktig da nettleserens minne kan nullstilles uventet."
+    }
+  },
+  "warnings": {
+    "import_export_modal": {
+      "cannot_save_empty": "Kan ikke lagre en tom kalkulator",
+      "cannot_save_no_name_or_version" : "Kan ikke lagre en kalkulator uten navn og versjonsnummer",
+      "no_calculators": "Ingen kalkulatorer funnet",
+      "api_error": "En feil oppstod i kommunikasjon med API",
+      "save_successful_db" : "Kalkulator lagret",
+      "invalid_auth_token": "Ugyldig autentisering. Forsøk å logg ut og inn igjen, og forsøk så på nytt.",
+      "error_saving_db": "En feil oppstod under lagring av kalkulatoren",
+      "error_auth_token_retrieval": "En feil oppstod ved henting av autentisering. Logg ut og inn, og forsøk så på nytt."
+    }
+  },
+  "buttons": {
+    "main_ui": {
+      "file_dropdown": {
+        "title": "Fil",
+        "alt_import_export": "Import/Eksport",
+        "alt_clear": "Fjern"
+      },
+      "view_dropdown": {
+        "title": "Visning",
+        "alt_view_all": "Vis alt",
+        "alt_focus_sel": "Fokuser valgt"
+      }
+    },
+    "import_export_modal" : {
+      "local_storage": {
+        "restore" : "Gjenopprett",
+        "save" : "Lagre"
+      },
+      "db_storage": {
+        "export" : "Eksporter",
+        "exporting" : "Eksporterer...",
+        "export_alternatives": {
+          "save": "Lagre",
+          "publish": "Lagre og publiser",
+          "developerPublish": "Lagre og publiser som WIP"
+        }
+      },
+      "refresh" : "Oppdater kalkulatorliste"
+    }
+  }
+}
