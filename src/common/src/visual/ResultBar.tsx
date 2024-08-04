@@ -24,7 +24,7 @@ export function ResultBar(props: {
                 title={node.label}
                 value={node.value}
                 unit={props.displayData.unit}
-                max={props.displayData.max > 0 ? props.displayData.max : fallbackMax}
+                max={Math.max(props.displayData.max, fallbackMax)}
                 color={node.color}
             />
         )
