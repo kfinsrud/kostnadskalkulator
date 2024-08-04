@@ -105,11 +105,15 @@ export function resolveIncomingModuleConnections(
                             sourceOutput: inputConnection.sourceOutput,
                             targetInput: connectionFromModuleInput.targetInput
                         })
+
                         if(moduleInputTargetNode.type === NodeType.Choose) {
-                            const comparisons = (moduleInputTargetNode as ChooseNode).getComparisonControls();
-                            const oldComparison = comparisons.find( c => c.sourceID === inputConnection.target);
-                            if(oldComparison) {
-                                oldComparison.sourceID = inputConnection.source;
+                            if(connectionFromModuleInput.targetInput.startsWith("input")) {
+                                const inputNumber = (connectionFromModuleInput.targetInput || "").replace("input", "");
+                                const nr = Number.parseInt(inputNumber);
+                                const control = (moduleInputTargetNode as ChooseNode).getInputControlByIndex(nr);
+                                if(control) {
+                                    control.setNoUpdate({sourceID: inputConnection.source})
+                                }
                             }
                         }
                     }
