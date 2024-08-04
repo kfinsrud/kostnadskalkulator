@@ -7,7 +7,7 @@ import {NumberSocket} from "./numberSocket";
 export function canCreateConnection(editor: NodeEditor<Schemes>, connection: Schemes["Connection"]) {
     const { source, target } = getConnectionSockets(editor, connection);
 
-    return source && target && source.isCompatibleWith(target)
+    return source && target && source.isCompatibleWith(target) && connection.target != connection.source
 }
 
 type Sockets = ResultSocket | NumberSocket;
