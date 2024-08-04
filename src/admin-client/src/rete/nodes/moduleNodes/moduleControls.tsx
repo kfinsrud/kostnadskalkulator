@@ -46,7 +46,6 @@ export function ModuleNodeControl( props: {data: NodeControl<ModuleNodeControlDa
                     const selection = e.currentTarget.value;
                     props.data.set({currentModule: selection})
                 }}
-
             >
                 <option>...</option>
                 {props.data.get('availableModules').map( module => {
