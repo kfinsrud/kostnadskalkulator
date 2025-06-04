@@ -14,7 +14,7 @@ function App() {
 
     return (
         <Router>
-                <DevelopmentHeaderWarning />
+                {/* <DevelopmentHeaderWarning /> */}
                 <Routes>
                     <Route element={<NavBar />}>
                         <Route path={"/dev"} element={<StartPage developerMode={true} />}/>
