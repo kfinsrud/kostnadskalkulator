@@ -154,6 +154,7 @@ function DrawGraph(
             position: 'top',
         },
         xaxis: {
+            type: 'category', // Change made by HSS
             categories: props.xLabels,
             title: {
                 text: parseHtmlString(props.xUnit),
