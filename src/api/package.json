@@ -44,6 +44,7 @@
     "jwks-rsa": "^3.2.0",
     "jws": "^4.0.0",
     "methods": "^1.1.2",
+    "object-hash": "^3.0.0",
     "on-finished": "^2.4.1",
     "qs": "^6.13.0",
     "raw-body": "^2.5.2",
