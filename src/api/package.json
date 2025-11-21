@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "build": "rollup -c",
+    "build": "tsc && rollup -c rollup.config.mjs",
     "start": "node dist/bundle.cjs",
     "dev": "nodemon src/index.ts"
   },
@@ -52,6 +51,7 @@
     "unpipe": "^1.0.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/express": "^4.17.21",

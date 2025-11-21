@@ -2,8 +2,53 @@
   "name": "@skogkalk/common",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist/src/parseTree": {
+      "types": "./dist/src/parseTree/index.d.ts",
+      "import": "./dist/src/parseTree/index.js",
+      "require": "./dist/src/parseTree/index.js",
+      "default": "./dist/src/parseTree/index.js"
+    },
+    "./dist/src/parseTree/*": {
+      "types": "./dist/src/parseTree/*.d.ts",
+      "import": "./dist/src/parseTree/*.js",
+      "require": "./dist/src/parseTree/*.js",
+      "default": "./dist/src/parseTree/*.js"
+    },
+    "./dist/src/config/*": {
+      "types": "./dist/src/config/*.d.ts",
+      "import": "./dist/src/config/*.js",
+      "require": "./dist/src/config/*.js",
+      "default": "./dist/src/config/*.js"
+    },
+    "./dist/src/types/*": {
+      "types": "./dist/src/types/*.d.ts",
+      "import": "./dist/src/types/*.js",
+      "require": "./dist/src/types/*.js",
+      "default": "./dist/src/types/*.js"
+    },
+    "./dist/src/visual/*": {
+      "types": "./dist/src/visual/*.d.ts",
+      "import": "./dist/src/visual/*.js",
+      "require": "./dist/src/visual/*.js",
+      "default": "./dist/src/visual/*.js"
+    },
+    "./dist/src/util/*": {
+      "types": "./dist/src/util/*.d.ts",
+      "import": "./dist/src/util/*.js",
+      "require": "./dist/src/util/*.js",
+      "default": "./dist/src/util/*.js"
+    }
+  },
   "scripts": {
     "start": "echo \"Error: no start specified\"",
     "build": "tsc",

@@ -6,8 +6,15 @@ import svgr from 'vite-plugin-svgr';
 import ckeditor5 from '@ckeditor/vite-plugin-ckeditor5';
 // https://vitejs.dev/config/
 export default defineConfig({
+    optimizeDeps: {
+        exclude: ['@skogkalk/common']
+    },
     build: {
-        outDir: 'build'
+        outDir: 'build',
+        commonjsOptions: {
+            transformMixedEsModules: true,
+            include: [/@skogkalk\/common/, /node_modules/]
+        }
     },
     base: '/editor/',
     server: {

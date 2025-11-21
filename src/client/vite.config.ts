@@ -5,8 +5,15 @@ import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 // https://vitejs.dev/config/
 export default defineConfig({
+    optimizeDeps: {
+        exclude: ['@skogkalk/common']
+    },
     build: {
-        outDir: 'build'
+        outDir: 'build',
+        commonjsOptions: {
+            transformMixedEsModules: true,
+            include: [/@skogkalk\/common/, /node_modules/]
+        }
     },
     test: {
         globals: true,
