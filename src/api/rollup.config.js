@@ -5,7 +5,7 @@ import resolve from '@rollup/plugin-node-resolve';
 export default {
     input: 'src/index.ts', // Point to your entry file, adjust as needed
     output: {
-        file: 'dist/bundle.js', // Output file
+        file: 'dist/bundle.cjs', // Output file
         format: 'cjs', // Output format (cjs for CommonJS)
         sourcemap: true // Enable source maps
     },

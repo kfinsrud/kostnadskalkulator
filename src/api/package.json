@@ -8,7 +8,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "build": "rollup -c",
-    "start": "node dist/bundle.js",
+    "start": "node dist/bundle.cjs",
     "dev": "nodemon src/index.ts"
   },
   "engines": {
