@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npm --prefix api start",
     "build": "npm run clean && npm run build --workspaces",
+    "gcp-build": "npm run build",
     "clean": "rimraf ./common/dist",
     "test": "npm run test --workspaces",
     "clean_test": "npm run build && npm run test"
