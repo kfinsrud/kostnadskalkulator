@@ -18,6 +18,7 @@ export default class WebServer {
     constructor(config: Configuration) {
         this.#config = config
         this.app = express()
+        this.app.set('trust proxy', true) // Trust X-Forwarded-For from Google Cloud load balancer
         this.#initRouting()
     }
 
@@ -32,7 +33,11 @@ export default class WebServer {
 
     #initRouting() {
         let router = express.Router()
-            .use(rateLimit({windowMs: 5 * 60 * 1000, limit: 300}))
+            .use(rateLimit({
+                windowMs: 5 * 60 * 1000,
+                limit: 300,
+                validate: {trustProxy: false} // Disable validation warning - we handle proxy configuration
+            }))
             .use(express.json({limit: '32mb'}))
             .use(cors()) // temprory during development to allow CORS
             .get('/api/v1/getCalculatorsInfo', getCalculatorsInfo(this.#config.database))
