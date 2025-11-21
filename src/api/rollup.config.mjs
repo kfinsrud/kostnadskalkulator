@@ -12,6 +12,10 @@ export default {
         resolve() // Resolves node modules
     ],
     external: (id) => {
+        // Don't externalize @skogkalk/common - it needs to be bundled
+        if (id.startsWith('@skogkalk/common')) {
+            return false;
+        }
         // Don't externalize absolute paths to our source files
         if (id.includes('/src/') || id.includes('\\src\\')) {
             return false;
@@ -20,7 +24,7 @@ export default {
         if (id.startsWith('.') || id.startsWith('/')) {
             return false;
         }
-        // Externalize all bare module imports (from node_modules), including @skogkalk/common
+        // Externalize all other bare module imports (from node_modules)
         return true;
     }
 
