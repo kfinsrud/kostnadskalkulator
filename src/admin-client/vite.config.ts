@@ -11,6 +11,7 @@ export default defineConfig({
     },
     build: {
         outDir: 'build',
+        target: ['es2020', 'chrome88', 'edge88', 'firefox82', 'safari14'],
         commonjsOptions: {
             transformMixedEsModules: true,
             include: [/@skogkalk\/common/, /node_modules/]
