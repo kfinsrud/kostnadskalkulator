@@ -32,7 +32,7 @@ export function ResultGraph(
 
     const sanitizeHTML = (html: string | undefined) => {
         if(html != undefined) {
-            return DOMPurify.sanitize(html.replace(/<p>(.*?)<\/p>|(.*)/gs, '$1'))
+            return DOMPurify.sanitize(html.replace(/<p>([\s\S]*?)<\/p>|([\s\S]*)/g, '$1'))
         } else {
             return "";
         }
