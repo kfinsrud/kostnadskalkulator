@@ -23,11 +23,14 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.2",
+    "debug": "^4.3.7",
     "firebase": "^12.6.0",
+    "globrex": "^0.1.2",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^18.3.1",
-    "react-icons": "^4.12.0"
+    "react-icons": "^4.12.0",
+    "tsconfck": "^3.0.3"
   },
   "overrides": {
     "@types/react": "^18.3.0",
@@ -36,7 +39,8 @@
     "got": "11.8.5",
     "body-parser": "1.20.3",
     "tmp": ">=0.2.4",
-    "update-notifier": "5.1.0"
+    "update-notifier": "5.1.0",
+    "esbuild": "^0.25.0"
   },
   "workspaces": [
     "common",
