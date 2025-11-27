@@ -7,7 +7,7 @@ import ckeditor5 from '@ckeditor/vite-plugin-ckeditor5';
 // https://vitejs.dev/config/
 export default defineConfig({
     optimizeDeps: {
-        exclude: ['@skogkalk/common']
+        exclude: ['@skogkalk/common', 'web-worker']
     },
     build: {
         outDir: 'build',
