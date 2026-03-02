@@ -39,7 +39,7 @@
     "tmp": ">=0.2.4",
     "update-notifier": "5.1.0",
     "jws": "4.0.1",
-    "fast-xml-parser": "5.3.6",
+    "fast-xml-parser": "5.3.8",
     "lodash-es": "4.17.23",
     "minimatch": "10.2.3",
     "serialize-javascript": "7.0.3"
