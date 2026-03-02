@@ -41,7 +41,8 @@
     "jws": "4.0.1",
     "fast-xml-parser": "5.3.6",
     "lodash-es": "4.17.23",
-    "minimatch": "10.2.3"
+    "minimatch": "10.2.3",
+    "serialize-javascript": "7.0.3"
   },
   "workspaces": [
     "common",
