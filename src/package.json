@@ -42,8 +42,7 @@
     "fast-xml-parser": "5.3.8",
     "lodash-es": "4.17.23",
     "minimatch": "10.2.3",
-    "serialize-javascript": "7.0.3",
-    "ckeditor5": "47.6.0"
+    "serialize-javascript": "7.0.3"
   },
   "workspaces": [
     "common",
