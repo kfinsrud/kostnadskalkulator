@@ -42,7 +42,8 @@
     "fast-xml-parser": "5.3.8",
     "lodash-es": "4.17.23",
     "minimatch": "10.2.3",
-    "serialize-javascript": "7.0.3"
+    "serialize-javascript": "7.0.3",
+    "@tootallnate/once": "3.0.1"
   },
   "workspaces": [
     "common",
