@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {SavedResult} from "../../types/SavedResult";
 import { useAppSelector } from "../../state/hooks";
 import {selectURLQueries} from "../../state/treeSelectors";
-import {useParams} from "react-router-dom";
+import {useParams} from "react-router";
 
 export function SaveMenuButton() {
     const [show, setShow] = useState(false)

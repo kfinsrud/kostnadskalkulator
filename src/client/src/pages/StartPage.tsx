@@ -1,5 +1,5 @@
 import {Button, Card, Col, Row} from "react-bootstrap";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 import {useGetCalculatorsInfoQuery} from "../state/store";
 
 export function StartPage(

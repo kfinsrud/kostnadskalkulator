@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {Alert, Button, Container} from "react-bootstrap";
 import {ResultParameters} from "../../components/result/ResultParameters";
 import {ResultPeek} from "../../components/result/ResultPeek";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router";
 import {useGetCalculatorTreeQuery} from "../../state/store";
 import {initiateTree} from "../../state/treeSlice";
 import {treeStateFromData} from "@skogkalk/common/dist/src/parseTree";

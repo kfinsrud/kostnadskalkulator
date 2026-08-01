@@ -1,7 +1,7 @@
 import {Button, Col, Collapse, Container, Row} from "react-bootstrap";
 import '../App.css'
 import React, {useEffect, useState} from "react";
-import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
+import {Link, Outlet, useLocation, useNavigate} from "react-router";
 import {MdArrowBackIosNew, MdClose, MdMenu} from "react-icons/md";
 import {ShareResultButton} from "../components/buttons/ShareResultButton";
 import {SaveMenuButton} from "../components/buttons/SaveMenuButton";

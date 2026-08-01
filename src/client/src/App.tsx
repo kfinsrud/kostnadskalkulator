@@ -1,7 +1,7 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {DevelopmentHeaderWarning} from "./containers/DevelopmentHeaderWarning";
-import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import {BrowserRouter as Router, Route, Routes} from "react-router";
 import {InformationalScientificSourcesPage} from "./pages/informational/InformationalScientificSourcesPage";
 import {InformationalDefaultValuesPage} from "./pages/informational/InformationalDefaultValuesPage";
 import {FeedbackPage} from "./pages/FeedbackPage";

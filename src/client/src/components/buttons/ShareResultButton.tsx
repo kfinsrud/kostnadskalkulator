@@ -3,7 +3,7 @@ import {MdShare} from "react-icons/md"
 import React from "react";
 import {useAppSelector} from "../../state/hooks";
 import {selectURLQueries} from "../../state/treeSelectors";
-import {useParams} from "react-router-dom";
+import {useParams} from "react-router";
 
 /**
  * ShareResultButton is a button that copies the current url to the clipboard
