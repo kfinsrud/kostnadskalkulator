@@ -1,7 +1,7 @@
 import {Navbar, NavDropdown} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {useServices} from "../../contexts/ServiceContext";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 
 /**
  * Component that displays the user's email address and a logout button in the navbar

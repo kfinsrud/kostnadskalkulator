@@ -1,5 +1,5 @@
 import {useServices} from "../contexts/ServiceContext";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 import React, {FormEvent, useCallback, useEffect, useState} from "react";
 import {Col} from "react-bootstrap";
 import Container from "react-bootstrap/Container";
