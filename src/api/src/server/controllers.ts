@@ -59,7 +59,19 @@ export function getCalculatorSchema(db: IDatabase) {
 
 export function calculateResult(db: IDatabase) {
     return async function(req: express.Request, res: express.Response) {
-        const {name, version, mode, inputs} = req.body as { name: string, version: number, mode: string, inputs: any }
+        const {name, version, mode, inputs} = (req.body ?? {}) as {
+            name: string,
+            version: number,
+            mode: string,
+            inputs: any
+        }
+
+        /*
+         Commented out the old way of extracting request body parameters as the tests suddenly started failing with it. 
+         Using the nullish coalescing operator to provide a default empty object for req.body as a fallback.
+        
+        // const {name, version, mode, inputs} = req.body as { name: string, version: number, mode: string, inputs: any } 
+        */
         if (!name || !version || isNaN(version) || !mode || !['strict', 'relaxed'].includes(mode)) {
             return res.status(400).json({error: "Name, version and mode are required"})
         }
